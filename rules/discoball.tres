@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Rule" load_steps=2 format=3 uid="uid://cyarlm5b1y8sb"]
+
+[ext_resource type="Script" uid="uid://codgonvj17hd2" path="res://rules/rule.gd" id="1_6pba4"]
+
+[resource]
+script = ExtResource("1_6pba4")
+name = "Discoball"
+min_size = 5
+directions = Array[Vector2i]([Vector2i(1, 0), Vector2i(0, 1)])
+metadata/_custom_type_script = "uid://codgonvj17hd2"

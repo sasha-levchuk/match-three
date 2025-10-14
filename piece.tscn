@@ -1,0 +1,49 @@
+[gd_scene load_steps=4 format=3 uid="uid://dbcqeh1wtvq3h"]
+
+[ext_resource type="Texture2D" uid="uid://cccao7rm8u8wr" path="res://piece.png" id="1_3makh"]
+[ext_resource type="Script" uid="uid://cnw41kmtoqyor" path="res://piece.gd" id="2_hisf2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hisf2"]
+bg_color = Color(1, 1, 1, 1)
+
+[node name="Button" type="Button"]
+clip_children = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -324.0
+offset_top = -324.0
+offset_right = -234.0
+offset_bottom = -234.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(64, 64)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 12
+icon = ExtResource("1_3makh")
+flat = true
+autowrap_mode = 2
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("2_hisf2")
+TypeColor = Dictionary[int, Color]({
+0: Color(0, 0.4301541, 0.81452465, 1),
+1: Color(0.7980649, 0.54995686, 3.85046e-07, 1),
+2: Color(0.2835, 0.63, 0.1575, 1),
+3: Color(0.83137256, 0.17254902, 0.29411766, 1)
+})
+metadata/_edit_use_anchors_ = true
+
+[node name="Overlay" type="Panel" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_right = 165.0
+offset_bottom = 160.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hisf2")
+
+[connection signal="button_down" from="." to="." method="_on_button_down"]
+[connection signal="button_up" from="." to="." method="_on_button_up"]
