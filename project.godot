@@ -20,7 +20,11 @@ Event="*res://event.gd"
 
 [display]
 
-window/size/viewport_width=648
+window/size/viewport_width=600
+window/size/viewport_height=600
+window/size/initial_position_type=0
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [rendering]
 

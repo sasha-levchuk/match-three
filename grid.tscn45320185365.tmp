@@ -1,0 +1,33 @@
+[gd_scene load_steps=6 format=3 uid="uid://b38x0wnjl37d3"]
+
+[ext_resource type="Script" uid="uid://c16yawwdda26y" path="res://grid.gd" id="1_ebq2e"]
+[ext_resource type="PackedScene" uid="uid://dbcqeh1wtvq3h" path="res://piece.tscn" id="2_65i6o"]
+[ext_resource type="Script" uid="uid://codgonvj17hd2" path="res://rules/rule.gd" id="3_bghhw"]
+[ext_resource type="Resource" uid="uid://bsheshmiruoob" path="res://rules/three.tres" id="4_fqc2p"]
+[ext_resource type="Resource" uid="uid://cyarlm5b1y8sb" path="res://rules/discoball.tres" id="4_g2qvd"]
+
+[node name="Node" type="Node"]
+
+[node name="DebugButton" type="Button" parent="."]
+unique_name_in_owner = true
+offset_left = 514.0
+offset_top = 33.0
+offset_right = 618.0
+offset_bottom = 64.0
+text = "debug event
+"
+
+[node name="Grid" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 47.0
+offset_top = 597.0
+offset_right = -57.0
+offset_bottom = 566.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ebq2e")
+piece_scene = ExtResource("2_65i6o")
+rules = Array[ExtResource("3_bghhw")]([ExtResource("4_g2qvd"), ExtResource("4_fqc2p")])
