@@ -18,5 +18,6 @@ powerup_type_colors = Dictionary[int, Color]({
 0: Color(1, 0, 1, 1),
 1: Color(1, 0.5019608, 0, 1),
 2: Color(0.49019608, 1, 0, 1),
-3: Color(0, 1, 1, 1)
+3: Color(0, 1, 1, 1),
+4: Color(0, 0, 1, 1)
 })

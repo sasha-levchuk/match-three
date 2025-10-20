@@ -7,7 +7,9 @@ signal piece_arrived
 @warning_ignore("unused_signal")
 signal piece_dragged
 @warning_ignore("unused_signal")
-signal match_processed
+signal match_processed( match_result: MatchResult )
+@warning_ignore("unused_signal")
+signal powerup_triggered
 
 
 #var events: Dictionary[Signal, Array]

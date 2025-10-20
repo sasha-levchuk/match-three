@@ -1,14 +1,16 @@
-[gd_scene load_steps=5 format=3 uid="uid://dbcqeh1wtvq3h"]
+[gd_scene load_steps=6 format=3 uid="uid://dbcqeh1wtvq3h"]
 
 [ext_resource type="Texture2D" uid="uid://cccao7rm8u8wr" path="res://piece.png" id="1_3makh"]
 [ext_resource type="Script" uid="uid://cnw41kmtoqyor" path="res://piece.gd" id="2_hisf2"]
 [ext_resource type="Resource" uid="uid://budkkckyfg8lv" path="res://db.tres" id="3_sk825"]
+[ext_resource type="Script" uid="uid://pmsn0u81vky1" path="res://components/draggable.gd" id="4_y1xrd"]
 
 [sub_resource type="Curve" id="Curve_sk825"]
 _data = [Vector2(0, 0), 0.0, 1.0, 0, 0, Vector2(0.25, 0.25), 1.0, 1.0, 0, 0, Vector2(0.77635777, 1), 2.0, 2.0, 0, 0, Vector2(0.92012775, 1), -1.6736232, -1.6736232, 0, 0, Vector2(1, 1), 1.0122728, 0.0, 0, 0]
 point_count = 5
 
-[node name="Button" type="Button"]
+[node name="Button" type="Button" node_paths=PackedStringArray("draggable")]
+modulate = Color(1, 1, 1, 0.5019608)
 clip_children = 2
 anchors_preset = 8
 anchor_left = 0.5
@@ -30,6 +32,11 @@ autowrap_mode = 2
 icon_alignment = 1
 expand_icon = true
 script = ExtResource("2_hisf2")
+draggable = NodePath("Draggable")
 db = ExtResource("3_sk825")
 fall_curve = SubResource("Curve_sk825")
 metadata/_edit_use_anchors_ = true
+
+[node name="Draggable" type="Node" parent="."]
+script = ExtResource("4_y1xrd")
+metadata/_custom_type_script = "uid://pmsn0u81vky1"

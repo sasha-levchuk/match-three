@@ -1,34 +1,29 @@
+#TODO:
+#make the rocket powerup into two subtypes - vertical and horizontal
+#fix z-order issues
+#add powerup behaviors
+#currently there's a bug with pieces overlapping,
+#possibly because of early swiping upon dragging a powerup piece.
 extends Control
 
-@export var SIZE_square := 7
+@export var SIZE_square := 6
 @export var SIZE := Vector2i(SIZE_square, SIZE_square)
 @export var piece_scene: PackedScene
-@export var rules: Array[Rule]
 @export var db: Resource
+@export var matcher: Node
+var deletion_batch: Array[Piece]
 
 
 func _ready():
-	for rule: Rule in rules:
-		rule.setup(self)
+	Rule.get_piece = get_piece
+	Powerup.get_piece = get_piece
 	Event.piece_deleted.connect(on_piece_deleted)
 	Event.piece_arrived.connect(on_piece_arrived)
 	Event.piece_dragged.connect(on_piece_dragged)
 	Event.match_processed.connect(on_match_processed)
-	await get_tree().create_timer( .5 ).timeout
+	Event.powerup_triggered.connect(on_powerup_triggered)
+	await get_tree().create_timer(.5).timeout
 	swipe()
-
-
-func match_coord(piece: Piece):
-	for rule: Rule in rules:
-		if rule.execute(piece.coord, piece.matchable.type):
-			rule.matches.append(piece)
-			rule.matches.filter(func(p):p.delete())
-			piece.destination = -Vector2i.ONE
-			if rule.reward != Powerup.Type.NONE:
-				spawn_powerup(piece.coord, rule.reward)
-			Event.match_processed.emit(piece, rule.matches)
-			return
-	Event.match_processed.emit(piece, [] as Array[Piece])
 
 
 func get_piece(coord: Vector2i) -> Piece:
@@ -43,19 +38,16 @@ func get_piece_by_dest(coord: Vector2i) -> Piece:
 
 
 func on_piece_arrived(piece: Piece):
-	if piece.matchable:
-		match_coord(piece)
-	else:
-		swipe()
+	pass
 
 
 func on_piece_dragged(piece: Piece, where_to: Vector2i):
 	var swap_piece: Piece = get_piece(where_to)
-	if swap_piece and swap_piece.state==Piece.State.IDLE: 
-		drag_results.append( DragResult.new(piece, swap_piece) )
+	if swap_piece and swap_piece.state==Piece.State.IDLE:
+		drag_results.append(DragResult.new(piece, swap_piece))
 		swap(piece, swap_piece)
 	else:
-		piece.drag(piece.coord)
+		piece.place_back()
 
 
 func swap(piece1: Piece, piece2: Piece):
@@ -70,15 +62,6 @@ class DragResult:
 	var matches: Array[Piece]
 	func _init(p1, p2): 
 		pieces.append_array([p1, p2])
-
-
-var match_results: Array[MatchResult]
-class MatchResult:
-	var piece: Piece
-	var matches: Array[Piece]
-	func _init(p: Piece, a: Array[Piece]): 
-		piece = p
-		matches = a
 
 
 func on_match_processed(piece: Piece, matches: Array[Piece]):
@@ -99,7 +82,7 @@ func on_match_processed(piece: Piece, matches: Array[Piece]):
 # to avoid conflict, we wait for all deletion animations to play out
 # and send their signals here
 # and only upon the last signal of the bunch we swipe the board
-func on_piece_deleted(deleted_piece: Piece):
+func on_piece_deleted(deleted_piece:Piece):
 	for drag_result: DragResult in drag_results:
 		if drag_result.counter==2 and deleted_piece in drag_result.matches:
 			drag_result.matches.erase(deleted_piece)
@@ -119,6 +102,7 @@ func on_piece_deleted(deleted_piece: Piece):
 
 
 func swipe():
+	prints('')
 	for column: int in SIZE.x:
 		var holes := 0
 		for row: int in SIZE.y:
@@ -127,7 +111,8 @@ func swipe():
 			if piece and not piece.is_queued_for_deletion():
 				if piece.state==Piece.State.DELETED or piece.state==Piece.State.DRAGGING:
 					holes = 0
-				piece.swipe(holes)
+				else:
+					piece.swipe(holes)
 			else:
 				holes += 1
 		if true:
@@ -153,3 +138,7 @@ func spawn(coord: Vector2i, height:=0):
 	add_child(piece, true)
 	piece.init(coord, Matchable, type)
 	piece.swipe(height)
+
+
+func on_powerup_triggered(_triggered_piece: Piece):
+	pass
