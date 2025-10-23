@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3 uid="uid://b38x0wnjl37d3"]
+
+[ext_resource type="Script" uid="uid://c16yawwdda26y" path="res://grid.gd" id="1_ebq2e"]
+
+[sub_resource type="GDScript" id="GDScript_ebq2e"]
+resource_name = "destroy mode"
+script/source = "extends Button
+@export var grid: Node
+
+
+func _on_toggled(toggled_on):
+	for piece: Piece in grid.get_children():
+		piece.destroy_button.visible = toggled_on
+"
+
+[node name="Node" type="Node"]
+
+[node name="DestroyMode" type="Button" parent="." node_paths=PackedStringArray("grid")]
+unique_name_in_owner = true
+offset_left = 461.0
+offset_top = 18.0
+offset_right = 578.0
+offset_bottom = 49.0
+toggle_mode = true
+text = "Destroy Mode
+"
+script = SubResource("GDScript_ebq2e")
+grid = NodePath("../Grid")
+
+[node name="Grid" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 585.0
+offset_right = -86.0
+offset_bottom = 554.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ebq2e")
+
+[connection signal="toggled" from="DestroyMode" to="DestroyMode" method="_on_toggled"]

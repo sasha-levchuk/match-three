@@ -47,7 +47,7 @@ func setup():
 		}[reward]
 
 
-func execute(piece: Piece):
+func match_piece(piece: Piece):
 	for direction in directions:
 		matches.clear()
 		matcher_main.call(piece.coord, direction, piece.matchable.type)
@@ -55,7 +55,9 @@ func execute(piece: Piece):
 			matches.append(piece)
 			if matcher_optional.is_valid():
 				matcher_optional.call(piece.coord, direction, piece.matchable.type)
+			matches.filter(func(p):p.destroy())
 			return true
+	return false
 
 
 func match_line(coord, direction, type):

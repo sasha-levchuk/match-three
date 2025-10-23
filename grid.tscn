@@ -1,19 +1,39 @@
-[gd_scene load_steps=4 format=3 uid="uid://b38x0wnjl37d3"]
+[gd_scene load_steps=11 format=3 uid="uid://b38x0wnjl37d3"]
 
 [ext_resource type="Script" uid="uid://c16yawwdda26y" path="res://grid.gd" id="1_ebq2e"]
-[ext_resource type="PackedScene" uid="uid://dbcqeh1wtvq3h" path="res://piece.tscn" id="2_65i6o"]
-[ext_resource type="Script" uid="uid://cd0gx3uow5tqp" path="res://matcher.gd" id="3_sle3t"]
+[ext_resource type="Script" uid="uid://codgonvj17hd2" path="res://rules/rule.gd" id="2_b0p4s"]
+[ext_resource type="Resource" uid="uid://cyarlm5b1y8sb" path="res://rules/discoball.tres" id="3_xw4xy"]
+[ext_resource type="Resource" uid="uid://gl27brn6o7sn" path="res://rules/tnt.tres" id="4_ifj8t"]
+[ext_resource type="Resource" uid="uid://bm72fw2wwxinn" path="res://rules/rocket_h.tres" id="5_ghb71"]
+[ext_resource type="Resource" uid="uid://w110q682ng72" path="res://rules/rocket_v.tres" id="6_kc0yb"]
+[ext_resource type="Resource" uid="uid://bye5pcrobj386" path="res://rules/fan.tres" id="7_hsp7l"]
+[ext_resource type="Resource" uid="uid://bsheshmiruoob" path="res://rules/three.tres" id="8_5xkti"]
+[ext_resource type="PackedScene" uid="uid://dbcqeh1wtvq3h" path="res://piece.tscn" id="9_7jn42"]
+
+[sub_resource type="GDScript" id="GDScript_ebq2e"]
+resource_name = "destroy mode"
+script/source = "extends Button
+@export var grid: Node
+
+
+func _on_toggled(toggled_on):
+	for piece: Piece in grid.get_children():
+		piece.destroy_button.visible = toggled_on
+"
 
 [node name="Node" type="Node"]
 
-[node name="DebugButton" type="Button" parent="."]
+[node name="DestroyModeBtn" type="Button" parent="." node_paths=PackedStringArray("grid")]
 unique_name_in_owner = true
-visible = false
-offset_left = 484.0
-offset_top = 15.0
-offset_right = 588.0
-offset_bottom = 46.0
-text = "pause toggle"
+offset_left = 461.0
+offset_top = 18.0
+offset_right = 578.0
+offset_bottom = 49.0
+toggle_mode = true
+text = "Destroy Mode
+"
+script = SubResource("GDScript_ebq2e")
+grid = NodePath("../Grid")
 
 [node name="Grid" type="Control" parent="."]
 layout_mode = 3
@@ -27,8 +47,8 @@ offset_bottom = 554.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ebq2e")
+rules = Array[ExtResource("2_b0p4s")]([ExtResource("3_xw4xy"), ExtResource("4_ifj8t"), ExtResource("5_ghb71"), ExtResource("6_kc0yb"), ExtResource("7_hsp7l"), ExtResource("8_5xkti")])
+piece_scene = ExtResource("9_7jn42")
 SIZE_square = null
-piece_scene = ExtResource("2_65i6o")
 
-[node name="Matcher" type="Node" parent="."]
-script = ExtResource("3_sle3t")
+[connection signal="toggled" from="DestroyModeBtn" to="DestroyModeBtn" method="_on_toggled"]

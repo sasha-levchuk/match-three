@@ -1,12 +1,7 @@
 class_name Draggable extends Node
 var drag_center: Vector2
 var drag_offset: Vector2
-signal dragged
-
-
-func _ready():
-	owner.button_down.connect(_on_button_down)
-	owner.button_up.connect(_on_button_up)
+signal drag_initiated(piece: Piece)
 
 
 func _on_button_down():
@@ -24,10 +19,10 @@ func _process(_delta):
 	if offset and not offset.x * offset.y:
 		owner.destination += offset
 		owner.disabled = true
+		drag_initiated.emit(owner)
 
 
 func _on_button_up():
-	if is_processing():
-		set_process(false)
-		owner.z_index -= 2
-		dragged.emit()
+	set_process(false)
+	owner.z_index -= 2
+	owner.drag()

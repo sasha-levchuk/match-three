@@ -1,29 +1,17 @@
-[gd_scene load_steps=6 format=3 uid="uid://dbcqeh1wtvq3h"]
+[gd_scene load_steps=5 format=3 uid="uid://dbcqeh1wtvq3h"]
 
 [ext_resource type="Texture2D" uid="uid://cccao7rm8u8wr" path="res://piece.png" id="1_3makh"]
 [ext_resource type="Script" uid="uid://cnw41kmtoqyor" path="res://piece.gd" id="2_hisf2"]
-[ext_resource type="Resource" uid="uid://budkkckyfg8lv" path="res://db.tres" id="3_sk825"]
 [ext_resource type="Script" uid="uid://pmsn0u81vky1" path="res://components/draggable.gd" id="4_y1xrd"]
 
 [sub_resource type="Curve" id="Curve_sk825"]
-_data = [Vector2(0, 0), 0.0, 1.0, 0, 0, Vector2(0.25, 0.25), 1.0, 1.0, 0, 0, Vector2(0.77635777, 1), 2.0, 2.0, 0, 0, Vector2(0.92012775, 1), -1.6736232, -1.6736232, 0, 0, Vector2(1, 1), 1.0122728, 0.0, 0, 0]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.2777778, 0.15730345), 1.0, 1.0, 0, 0, Vector2(0.77635777, 1), 2.0, 2.0, 0, 0, Vector2(0.92012775, 1), -1.6736232, -1.6736232, 0, 0, Vector2(1, 1), 1.0122728, 0.0, 0, 0]
 point_count = 5
 
-[node name="Button" type="Button" node_paths=PackedStringArray("draggable")]
-modulate = Color(1, 1, 1, 0.5019608)
+[node name="Button" type="Button" node_paths=PackedStringArray("draggable", "destroy_button")]
 clip_children = 2
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -324.0
-offset_top = -324.0
-offset_right = -247.0
-offset_bottom = -247.0
-grow_horizontal = 2
-grow_vertical = 2
-pivot_offset = Vector2(64, 64)
+offset_right = 77.0
+offset_bottom = 77.0
 theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 12
 icon = ExtResource("1_3makh")
@@ -32,11 +20,24 @@ autowrap_mode = 2
 icon_alignment = 1
 expand_icon = true
 script = ExtResource("2_hisf2")
-draggable = NodePath("Draggable")
-db = ExtResource("3_sk825")
 fall_curve = SubResource("Curve_sk825")
-metadata/_edit_use_anchors_ = true
+draggable = NodePath("Draggable")
+destroy_button = NodePath("DestroyButton")
 
 [node name="Draggable" type="Node" parent="."]
 script = ExtResource("4_y1xrd")
 metadata/_custom_type_script = "uid://pmsn0u81vky1"
+
+[node name="DestroyButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Delete
+"
+
+[connection signal="button_down" from="." to="Draggable" method="_on_button_down"]
+[connection signal="button_up" from="." to="Draggable" method="_on_button_up"]
+[connection signal="pressed" from="DestroyButton" to="." method="delete"]

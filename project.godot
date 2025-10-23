@@ -14,10 +14,6 @@ config/name="match-three"
 run/main_scene="uid://b38x0wnjl37d3"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 
-[autoload]
-
-Event="*res://event.gd"
-
 [display]
 
 window/size/viewport_width=600

@@ -1,10 +1,9 @@
 class_name Powerup
-static var get_piece := Callable()
+static var get_piece: Callable
 enum Type {DISCOBALL, TNT, ROCKET_V, ROCKET_H, FAN, NONE}
 var type: Type
 var trigger_single_behavior: Callable
 var owner: Piece
-
 
 
 func _init(_owner: Piece, _type: Type):
@@ -29,6 +28,10 @@ func _init(_owner: Piece, _type: Type):
 	owner.button_up.connect(trigger)
 
 
+func on_dragged():
+	trigger()
+
+
 func delete_piece(piece: Piece):
 	if piece and piece.state==Piece.State.IDLE:
 		if piece.powerup:
@@ -40,8 +43,3 @@ func delete_piece(piece: Piece):
 func trigger():
 	owner.delete()
 	trigger_single_behavior.call()
-	Event.powerup_triggered.emit(owner)
-
-
-func get_coords() -> Array:
-	return [[0,1],[1,0],[-1,0],[0,-1]].map(func(a): return Vector2i(a[0],a[1]))
