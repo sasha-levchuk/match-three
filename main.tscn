@@ -14,8 +14,9 @@ script/source = "extends Area2D
 
 func _on_body_exited(body: Node2D):
 	var block := body as Block
+	prints(body, 'exited', block.state_str, 'at', block.pos_simple.x)
 	if block.state == Block.State.MOVING: return
-	if block.state == Block.State.IDLE: return
+	#if block.state == Block.State.IDLE: return
 	var x: float = block.position.x
 	await get_tree().process_frame
 	var new_block := block_scene.instantiate() as Block
@@ -32,13 +33,6 @@ spawn_area = NodePath("SpawnArea")
 
 [node name="1" parent="." instance=ExtResource("1_0xm2m")]
 position = Vector2(127, 143)
-type_colors = Dictionary[int, Color]({
-0: Color(0.2509804, 0.2509804, 1, 1),
-1: Color(1, 1, 0, 1),
-2: Color(0, 1, 0, 1),
-3: Color(1, 0.20999998, 0.20999998, 1),
-4: Color(1, 0, 1, 1)
-})
 
 [node name="2" parent="." instance=ExtResource("1_0xm2m")]
 position = Vector2(206, 143)
@@ -48,13 +42,6 @@ position = Vector2(285, 143)
 
 [node name="4" parent="." instance=ExtResource("1_0xm2m")]
 position = Vector2(364, 143)
-type_colors = Dictionary[int, Color]({
-0: Color(0.2509804, 0.2509804, 1, 1),
-1: Color(1, 1, 0, 1),
-2: Color(0, 1, 0, 1),
-3: Color(1, 0.20999998, 0.20999998, 1),
-4: Color(1, 0, 1, 1)
-})
 
 [node name="5" parent="." instance=ExtResource("1_0xm2m")]
 position = Vector2(443, 143)
@@ -64,13 +51,6 @@ position = Vector2(522, 143)
 
 [node name="7" parent="." instance=ExtResource("1_0xm2m")]
 position = Vector2(601, 143)
-type_colors = Dictionary[int, Color]({
-0: Color(0.2509804, 0.2509804, 1, 1),
-1: Color(1, 1, 0, 1),
-2: Color(0, 1, 0, 1),
-3: Color(1, 0.20999998, 0.20999998, 1),
-4: Color(1, 0, 1, 1)
-})
 
 [node name="8" parent="." instance=ExtResource("1_0xm2m")]
 position = Vector2(680, 143)
@@ -79,7 +59,7 @@ position = Vector2(680, 143)
 position = Vector2(759, 143)
 
 [node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(134, 612)
+position = Vector2(127, 608)
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]

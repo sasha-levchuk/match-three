@@ -17,21 +17,23 @@ func _ready():
 
 func _on_swap_requested(block1: Block, direction: Vector2):
 	var block2 := get_block( block1.position + direction * block_size )
-	if not block2 or not block2.state==Block.State.IDLE: 
+	if ( not block2 or 
+		block2.is_queued_for_deletion() or
+		not is_instance_valid(block2) or
+		not block2.state==Block.State.IDLE
+	): 
 		return block1.draggable.reset_position()
 	block1.add_collision_exception_with(block2)
 	block1.move( block2.position )
 	await block2.move(block1.position)
-	await get_tree().physics_frame
-	await get_tree().physics_frame
+	for i in 6: await get_tree().physics_frame
 	var match1 := match_block(block1)
 	var match2 := match_block(block2)
 	if not match1 and not match2:
 		block1.move( block2.position )
 		await block2.move( block1.position )
 	block1.remove_collision_exception_with(block2)
-	await get_tree().physics_frame
-	await get_tree().physics_frame
+	for i in 6: await get_tree().physics_frame
 	if not match1:
 		block1.check_and_fall()
 	if not match2:
