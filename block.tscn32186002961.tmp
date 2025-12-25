@@ -1,0 +1,77 @@
+[gd_scene load_steps=6 format=3 uid="uid://b6b77187swjoj"]
+
+[ext_resource type="Texture2D" uid="uid://dry7uex243wlv" path="res://icon.svg" id="1_im0tn"]
+[ext_resource type="Script" uid="uid://bygncfy4y7ql6" path="res://block.gd" id="1_xfwl5"]
+[ext_resource type="Script" uid="uid://cnr436rri5xq8" path="res://matchable.gd" id="3_5d32t"]
+
+[sub_resource type="GDScript" id="GDScript_xfwl5"]
+resource_name = "sprite"
+script/source = "extends Sprite2D
+
+func _on_click_pressed(event: InputEventMouseButton):
+	prints('pressed', event)
+
+
+func _on_mouse_motion(event: InputEventMouseMotion):
+	position += event.relative
+
+
+func _on_click_released(event: InputEventMouseButton):
+	place_back()
+	prints('released', event)
+
+
+func place_back():
+	var tween := create_tween()
+	tween.tween_property(self, 'position', Vector2.ZERO, 0.2)
+	return tween.finished
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xfwl5"]
+size = Vector2(140, 138)
+
+[node name="Block" type="RigidBody2D" node_paths=PackedStringArray("sprite", "raycast_up", "raycast_down", "collider", "matchable")]
+input_pickable = true
+lock_rotation = true
+freeze_mode = 1
+contact_monitor = true
+max_contacts_reported = 10
+script = ExtResource("1_xfwl5")
+sprite = NodePath("Sprite")
+raycast_up = NodePath("RaycastUp")
+raycast_down = NodePath("RaycastDown")
+collider = NodePath("CollisionShape2D")
+matchable = NodePath("Matchable")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("1_im0tn")
+script = SubResource("GDScript_xfwl5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_xfwl5")
+
+[node name="ButtonClose" type="Button" parent="."]
+offset_left = 31.0
+offset_top = -57.0
+offset_right = 57.0
+offset_bottom = -26.0
+text = " x "
+
+[node name="RaycastUp" type="RayCast2D" parent="."]
+target_position = Vector2(0, -75)
+
+[node name="RaycastDown" type="RayCast2D" parent="."]
+target_position = Vector2(0, 75)
+
+[node name="Matchable" type="Node" parent="."]
+script = ExtResource("3_5d32t")
+type_colors = Dictionary[int, Color]({
+0: Color(0.57, 0.70616674, 1, 1),
+1: Color(1, 0.93333334, 0.54901963, 1)
+})
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="body_exited" from="." to="." method="_on_body_exited"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]
+[connection signal="sleeping_state_changed" from="." to="." method="_on_sleeping_state_changed"]
+[connection signal="pressed" from="ButtonClose" to="." method="delete"]
