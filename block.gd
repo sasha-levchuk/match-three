@@ -3,7 +3,7 @@ enum Type {
 	BLUE,
 	YELLOW,
 	GREEN,
-	#RED,
+	RED,
 	#PURPLE
 }
 var type: Type = Type.values().pick_random() as Type
@@ -41,7 +41,7 @@ func fall():
 var fall_time: float
 func _physics_process(delta):
 	fall_time += delta
-	var collision := move_and_collide(Vector2.DOWN * 40 * fall_time)
+	var collision := move_and_collide(Vector2.DOWN * 80 * fall_time)
 	if collision:
 		fall_time = 0
 		var body := collision.get_collider()

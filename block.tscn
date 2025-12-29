@@ -16,7 +16,7 @@ type_colors = Dictionary[int, Color]({
 1: Color(1, 0.75, 0, 1),
 2: Color(0.14901961, 0.81960785, 0.14901961, 1),
 3: Color(1, 0.38039216, 0.38039216, 1),
-4: Color(1, 0, 1, 1)
+4: Color(0.5749333, 0.17599998, 0.88, 1)
 })
 sprite = NodePath("Sprite")
 collider = NodePath("CollisionShape2D")

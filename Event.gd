@@ -1,5 +1,4 @@
 extends Node
-signal drag_started
 signal swap_requested
 signal block_landed
 signal block_deleted

@@ -14,7 +14,7 @@ script/source = "extends Area2D
 
 func _on_body_exited(body: Node2D):
 	var block := body as Block
-	prints(body, 'exited', block.state_str, 'at', block.pos_simple.x)
+	#prints(body, 'exited', block.state_str, 'at', block.pos_simple.x)
 	if block.state == Block.State.MOVING: return
 	#if block.state == Block.State.IDLE: return
 	var x: float = block.position.x

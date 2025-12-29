@@ -8,7 +8,7 @@ func _on_input_event(_viewport, event: InputEvent, _shape_idx):
 		if event.is_pressed() and block.state == Block.State.IDLE:
 			block.z_index += 1
 			block.state = Block.State.HELD
-			Event.drag_started.emit(block)
+			#Event.drag_started.emit(block)
 		if event.is_released() and block.state == Block.State.HELD:
 			reset_position()
 	elif event is InputEventMouseMotion:
