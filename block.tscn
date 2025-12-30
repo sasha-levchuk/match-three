@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://d3yq6lberjfy5" path="res://draggable.gd" id="3_mk58r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xfwl5"]
-size = Vector2(78, 78)
+size = Vector2(100, 100)
 
 [node name="Block" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "collider", "draggable")]
 disable_mode = 1
@@ -26,7 +26,7 @@ draggable = NodePath("Draggable")
 shape = SubResource("RectangleShape2D_xfwl5")
 
 [node name="Sprite" type="Sprite2D" parent="."]
-scale = Vector2(1.2, 1.2)
+scale = Vector2(1.4999999, 1.4999999)
 texture = ExtResource("2_5d32t")
 
 [node name="Draggable" type="Node" parent="."]

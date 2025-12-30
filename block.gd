@@ -56,7 +56,7 @@ func _physics_process(delta):
 func delete():
 	state = State.DELETING
 	var tween := create_tween()
-	tween.tween_property(self, 'modulate:a', 0, 0.2)
+	tween.tween_property(self, 'modulate:a', 0, 0.1)
 	tween.tween_callback(func():
 		queue_free()
 		Event.block_deleted.emit(position)
@@ -66,7 +66,7 @@ func delete():
 func move(to: Vector2):
 	state = State.MOVING
 	var tween := create_tween()
-	tween.tween_property(sprite, 'global_position', to, 0.2)
+	tween.tween_property(sprite, 'global_position', to, 0.1)
 	tween.tween_callback(func():
 		z_index = 0
 		position = to

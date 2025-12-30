@@ -14,7 +14,7 @@ script/source = "extends Area2D
 
 func _on_body_exited(body: Node2D):
 	var block := body as Block
-	#prints(body, 'exited', block.state_str, 'at', block.pos_simple.x)
+	prints(body, 'exited', block.state_str, 'at', block.position.x)
 	if block.state == Block.State.MOVING: return
 	#if block.state == Block.State.IDLE: return
 	var x: float = block.position.x
@@ -25,56 +25,48 @@ func _on_body_exited(body: Node2D):
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0xm2m"]
-size = Vector2(753.625, 98.5)
+size = Vector2(1173.625, 131.25)
 
 [node name="Main" type="Node2D" node_paths=PackedStringArray("spawn_area")]
 script = ExtResource("1_h2yge")
 spawn_area = NodePath("SpawnArea")
 
 [node name="1" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(127, 143)
+position = Vector2(107, 71)
 
 [node name="2" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(206, 143)
+position = Vector2(208, 71)
 
 [node name="3" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(285, 143)
+position = Vector2(309, 71)
 
 [node name="4" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(364, 143)
+position = Vector2(410, 71)
 
 [node name="5" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(443, 143)
+position = Vector2(511, 71)
 
 [node name="6" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(522, 143)
+position = Vector2(612, 71)
 
 [node name="7" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(601, 143)
+position = Vector2(713, 71)
 
 [node name="8" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(680, 143)
+position = Vector2(814, 71)
 
 [node name="9" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(759, 143)
+position = Vector2(915, 71)
 
 [node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(127, 608)
+position = Vector2(111, 620)
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
 shape = SubResource("WorldBoundaryShape2D_0xm2m")
 
-[node name="ButtonDeleteAll" type="Button" parent="."]
-offset_left = 828.0
-offset_top = 121.0
-offset_right = 907.0
-offset_bottom = 152.0
-text = "delete all
-"
-
 [node name="SpawnArea" type="Area2D" parent="." node_paths=PackedStringArray("collider")]
-position = Vector2(407, 72)
+position = Vector2(341, -58)
 collision_layer = 0
 script = SubResource("GDScript_0xm2m")
 block_scene = ExtResource("1_0xm2m")
@@ -82,8 +74,7 @@ collider = NodePath("CollisionShape2D")
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpawnArea"]
-position = Vector2(35.1875, 0)
+position = Vector2(245.1875, 16.375)
 shape = SubResource("RectangleShape2D_0xm2m")
 
-[connection signal="pressed" from="ButtonDeleteAll" to="." method="_on_button_delete_all_pressed"]
 [connection signal="body_exited" from="SpawnArea" to="SpawnArea" method="_on_body_exited"]
