@@ -33,7 +33,6 @@ texture = ExtResource("2_5d32t")
 script = ExtResource("3_mk58r")
 
 [node name="ButtonClose" type="Button" parent="."]
-visible = false
 offset_left = 19.0
 offset_top = -35.0
 offset_right = 45.0
@@ -42,7 +41,6 @@ scale = Vector2(0.6153771, 0.6137285)
 text = " x "
 
 [node name="Name" type="Label" parent="."]
-visible = false
 offset_left = -37.0
 offset_top = -22.0
 offset_right = 37.0
@@ -55,7 +53,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StateLabel" type="Label" parent="."]
-visible = false
 offset_left = -34.0
 offset_top = -37.0
 offset_right = 18.0

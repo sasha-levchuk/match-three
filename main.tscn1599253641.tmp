@@ -14,8 +14,9 @@ script/source = "extends Area2D
 
 func _on_body_exited(body: Node2D):
 	var block := body as Block
-	#prints(body, 'exited', block.state_str, 'at', block.position.x)
+	prints(body, 'exited', block.state_str, 'at', block.position.x)
 	if block.state == Block.State.MOVING: return
+	#if block.state == Block.State.IDLE: return
 	var x: float = block.position.x
 	await get_tree().process_frame
 	var new_block := block_scene.instantiate() as Block
@@ -31,7 +32,7 @@ script/source = "extends Button
 
 
 func _on_pressed():
-	Event.get_tree().paused = false
+	get_tree().paused = false
 "
 
 [node name="Main" type="Node2D" node_paths=PackedStringArray("spawn_area")]
