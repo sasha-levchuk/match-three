@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://b6b77187swjoj"]
 
 [ext_resource type="Script" uid="uid://bygncfy4y7ql6" path="res://block.gd" id="1_xfwl5"]
-[ext_resource type="Texture2D" uid="uid://cccao7rm8u8wr" path="res://piece.png" id="2_5d32t"]
+[ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="2_5d32t"]
 [ext_resource type="Script" uid="uid://d3yq6lberjfy5" path="res://draggable.gd" id="3_mk58r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xfwl5"]
@@ -26,8 +26,9 @@ draggable = NodePath("Draggable")
 shape = SubResource("RectangleShape2D_xfwl5")
 
 [node name="Sprite" type="Sprite2D" parent="."]
-scale = Vector2(1.4999999, 1.4999999)
+scale = Vector2(0.375, 0.375)
 texture = ExtResource("2_5d32t")
+hframes = 7
 
 [node name="Draggable" type="Node" parent="."]
 script = ExtResource("3_mk58r")

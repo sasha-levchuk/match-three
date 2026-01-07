@@ -19,12 +19,8 @@ static var shapes: Array[Shape] = [
 		match_line(coord, type, Vector2.RIGHT)),
 	Shape.new(Type.FAN, 4, 4, func(coord: Vector2, type: Block.Type, facing: Vector2):
 		for i in 3:
-			coord += facing * block_size
-			match_single(coord, type)
-			facing = facing.orthogonal()
+			match_single(coord + block_size * facing.rotated(i*PI/4), type)
 		if matches.size()<3: return
-		coord += facing * block_size
-		facing = facing.orthogonal()
 		match_single(coord + facing * 2 * block_size, type)
 		match_single(coord - facing * block_size, type)
 		match_single(coord + facing.orthogonal() * 2 * block_size, type)
@@ -38,8 +34,12 @@ static func match_block(block: Block) -> bool:
 		for i in shape.directions:
 			matches.clear()
 			shape.handler.call(block.position, block.type, directions[i])
-			matches.append(block)
-			if matches.size() >= shape.size:
+			if matches.size() + 1 >= shape.size:
+				if shape.type == Type.THREE:
+					matches.append(block)
+				else:
+					block.make_powerup(shape.type)
+					block.state = Block.State.IDLE
 				for matched_block: Block in matches:
 					matched_block.delete()
 				return true
@@ -59,7 +59,10 @@ static func match_toward(where: Vector2, type: Block.Type, direction: Vector2):
 
 static func match_single(where: Vector2, type: Block.Type) -> bool:
 	var block := get_block.call( where ) as Block
-	if block and block.type == type and block.state == Block.State.IDLE:
-		matches.append( block )
-		return true
+	if not block: return false
+	if block.is_powerup: return false
+	if not block.state == Block.State.IDLE: return false
+	if not block.type == type: return false
+	matches.append( block )
+	return true
 	return false

@@ -6,6 +6,9 @@ enum Type {
 	RED,
 	#PURPLE
 }
+enum PowerupType {DISCOBALL, TNT, ROCKETV, ROCKETH, FAN}
+var powerup_type: PowerupType
+var is_powerup: bool
 var type: Type = Type.values().pick_random() as Type
 @export var type_colors: Dictionary[Type, Color]
 static var num_blocks := 0
@@ -82,3 +85,10 @@ func check_and_fall():
 		Event.collapse_initiated.emit(position)
 	else:
 		state = State.IDLE
+
+
+func make_powerup(_type: Matcher.Type):
+	is_powerup = true
+	sprite.frame = 1 + _type as int
+	modulate = Color.WHITE
+	powerup_type = _type as PowerupType
