@@ -10,7 +10,10 @@ func _on_input_event(_viewport, event: InputEvent, _shape_idx):
 			block.state = Block.State.HELD
 			#Event.drag_started.emit(block)
 		if event.is_released() and block.state == Block.State.HELD:
-			reset_position()
+			if block.powerup:
+				block.powerup.trigger()
+			else:
+				reset_position()
 	elif event is InputEventMouseMotion:
 		if block.state == Block.State.HELD:
 			block.sprite.position += event.relative

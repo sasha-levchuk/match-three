@@ -1,4 +1,7 @@
 extends Node
+var get_idle_block: Callable
+
+
 
 func pause(time: float):
 	get_tree().paused = true

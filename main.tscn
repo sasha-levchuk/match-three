@@ -1,7 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://bp3ul08id42j3"]
+[gd_scene load_steps=6 format=3 uid="uid://bp3ul08id42j3"]
 
 [ext_resource type="PackedScene" uid="uid://b6b77187swjoj" path="res://block.tscn" id="1_0xm2m"]
-[ext_resource type="Script" uid="uid://cnihluhw6lr2o" path="res://main.gd" id="1_h2yge"]
+[ext_resource type="Script" uid="uid://cnihluhw6lr2o" path="res://board.gd" id="1_h2yge"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_0xm2m"]
 
@@ -26,44 +26,33 @@ func _on_body_exited(body: Node2D):
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0xm2m"]
 size = Vector2(1173.625, 131.25)
 
-[sub_resource type="GDScript" id="GDScript_h2yge"]
-script/source = "extends Button
-
-
-func _on_pressed():
-	Event.get_tree().paused = false
-"
-
-[node name="Main" type="Node2D" node_paths=PackedStringArray("spawn_area")]
+[node name="Board" type="Node2D" node_paths=PackedStringArray("spawn_area")]
 script = ExtResource("1_h2yge")
 spawn_area = NodePath("SpawnArea")
 
 [node name="1" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(107, 71)
+position = Vector2(77, 71)
 
 [node name="2" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(208, 71)
+position = Vector2(206, 71)
 
 [node name="3" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(309, 71)
+position = Vector2(335, 71)
 
 [node name="4" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(410, 71)
+position = Vector2(464, 71)
 
 [node name="5" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(511, 71)
+position = Vector2(593, 71)
 
 [node name="6" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(612, 71)
+position = Vector2(722, 71)
 
 [node name="7" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(713, 71)
+position = Vector2(851, 71)
 
 [node name="8" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(814, 71)
-
-[node name="9" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(915, 71)
+position = Vector2(980, 71)
 
 [node name="Floor" type="StaticBody2D" parent="."]
 position = Vector2(111, 620)
@@ -84,13 +73,4 @@ metadata/_edit_group_ = true
 position = Vector2(245.1875, 16.375)
 shape = SubResource("RectangleShape2D_0xm2m")
 
-[node name="Button" type="Button" parent="."]
-offset_left = 1036.0
-offset_top = 53.0
-offset_right = 1111.0
-offset_bottom = 84.0
-text = "unpause"
-script = SubResource("GDScript_h2yge")
-
 [connection signal="body_exited" from="SpawnArea" to="SpawnArea" method="_on_body_exited"]
-[connection signal="pressed" from="Button" to="Button" method="_on_pressed"]

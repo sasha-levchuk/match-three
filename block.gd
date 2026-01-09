@@ -6,9 +6,7 @@ enum Type {
 	RED,
 	#PURPLE
 }
-enum PowerupType {DISCOBALL, TNT, ROCKETV, ROCKETH, FAN}
-var powerup_type: PowerupType
-var is_powerup: bool
+var powerup: Powerup
 var type: Type = Type.values().pick_random() as Type
 @export var type_colors: Dictionary[Type, Color]
 static var num_blocks := 0
@@ -22,9 +20,9 @@ var state_str: String:
 var pos_simple: Vector2i: 
 	get(): return position / size as Vector2i
 @export var sprite: Sprite2D
-@export var collider: CollisionShape2D
 @export var draggable: Draggable
-@onready var size: Vector2 = collider.shape.size
+@export var collider: CollisionShape2D
+@onready var size: float = collider.shape.size.y
 func _to_string(): return Type.keys()[type].left(1) + str(name) 
 
 
@@ -87,8 +85,7 @@ func check_and_fall():
 		state = State.IDLE
 
 
-func make_powerup(_type: Matcher.Type):
-	is_powerup = true
+func make_powerup(_type: Powerup.Type):
+	powerup = Powerup.new(self, _type as Powerup.Type)
 	sprite.frame = 1 + _type as int
 	modulate = Color.WHITE
-	powerup_type = _type as PowerupType

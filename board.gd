@@ -1,15 +1,18 @@
-extends Node2D
+class_name Board extends Node2D
 @onready var block_size: Vector2 = load("res://block.tscn").instantiate().collider.shape.size
 @export var spawn_area: Area2D
 
 
 func _ready():
-	Matcher.get_block = get_block
-	Matcher.block_size = block_size
+	Global.get_idle_block = get_idle_block
+	Global.block_size = block_size
 	Event.swap_requested.connect(_on_swap_requested)
 	Event.block_landed.connect(Matcher.match_block)
 	Event.block_deleted.connect(collapse_up_recursive)
 	Event.collapse_initiated.connect(collapse_up_recursive)
+	Event.block_queried.connect(func(where: Vector2):
+		
+		)
 
 
 func _on_swap_requested(block1: Block, direction: Vector2):
@@ -63,3 +66,15 @@ func get_block(where: Vector2) -> Block:
 	if result.is_empty(): return null
 	var node: Node = result.pop_back().collider
 	return node as Block if node is Block else null
+
+
+func get_idle_block(where: Vector2) -> Block:
+	var block := get_block(where)
+	if block.state==Block.State.IDLE: return null
+	if block.powerup: return null
+	return block
+
+
+func get_all_blocks():
+	return get_children().filter(func(node): 
+		return node is Block and node.state==Block.State.IDLE and not node.powerup)

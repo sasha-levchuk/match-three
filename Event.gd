@@ -3,3 +3,4 @@ signal swap_requested
 signal block_landed
 signal block_deleted
 signal collapse_initiated
+signal block_queried

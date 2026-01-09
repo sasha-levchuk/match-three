@@ -1,44 +1,67 @@
-class_name Matcher extends Node
+extends CanvasItem
 enum Type{DISCOBALL, TNT, ROCKETV, ROCKETH, FAN, THREE}
-static var get_block: Callable
-static var block_size: Vector2
-static var matches: Array[Block]
-static var directions := [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
-static var shapes: Array[Shape] = [
-	Shape.new(Type.DISCOBALL, 2, 5, func(coord: Vector2, type: Block.Type, facing: Vector2):
-		match_line(coord, type, facing)
-		if matches.size()<4: return
-		match_line(coord, type, facing.orthogonal())),
-	Shape.new(Type.TNT, 1, 5, func(coord: Vector2, type: Block.Type, facing: Vector2):
-		match_line(coord, type, facing )
-		if matches.size()<2: return
-		match_line(coord, type, facing.orthogonal())),
-	Shape.new(Type.ROCKETV, 1, 4, func(coord, type, _facing):
-		match_line(coord, type, Vector2.UP)),
-	Shape.new(Type.ROCKETH, 1, 4, func(coord, type, _facing):
-		match_line(coord, type, Vector2.RIGHT)),
-	Shape.new(Type.FAN, 4, 4, func(coord: Vector2, type: Block.Type, facing: Vector2):
-		for i in 3:
-			match_single(coord + block_size * facing.rotated(i*PI/4), type)
-		if matches.size()<3: return
-		match_single(coord + facing * 2 * block_size, type)
-		match_single(coord - facing * block_size, type)
-		match_single(coord + facing.orthogonal() * 2 * block_size, type)
-		match_single(coord - facing.orthogonal() * block_size, type)),
-	Shape.new(Type.THREE, 2, 3, match_line)
+var matches: Array[Block]
+var block: Block
+var directions := [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
+var shapes: Array[Dictionary] = [
+	{
+		type = Powerup.Type.DISCOBALL,
+		directions = 2, 
+		requirement = 5, 
+		handler = func(offset: Vector2):
+			match_line(offset)
+			if matches.size()>=4:
+				match_line(offset.orthogonal()),
+	}, {
+		type = Powerup.Type.TNT, 
+		directions = 1, 
+		requirement = 5,
+		handler = func(offset: Vector2):
+			match_line(offset )
+			if matches.size()<2: return
+			match_line(offset.orthogonal()),
+	}, {
+		type = Powerup.Type.ROCKETV, 
+		directions = 1, 
+		requirement = 4, 
+		handler = func(__): match_line(Vector2.UP)
+	}, {
+		type = Powerup.Type.ROCKETH, 
+		directions = 1, 
+		requirement = 4, 
+		handler = func(__): match_line(Vector2.RIGHT)
+	},{
+		type = Type.FAN, 
+		directions = 4, 
+		requirement = 4, 
+		handler = func(offset: Vector2):
+			for i in 3:
+				match_single(offset.rotated(i*PI/4))
+			if matches.size()<3: return
+			match_single(offset*2)
+			match_single(offset.orthogonal()*2)
+			match_single(-offset)
+			match_single(-offset.orthogonal()),
+	}, {
+		type = Type.THREE, 
+		directions = 2,
+		requirement = 3, 
+		handler = match_line
+	}
 ]
 
 
-static func match_block(block: Block) -> bool:
-	for shape:Shape in shapes:
+func match_block(_block: Block) -> bool:
+	block = _block
+	for shape: Dictionary in shapes:
 		for i in shape.directions:
 			matches.clear()
-			shape.handler.call(block.position, block.type, directions[i])
+			shape.handler.call(directions[i])
 			if matches.size() + 1 >= shape.size:
 				if shape.type == Type.THREE:
 					matches.append(block)
 				else:
-					block.make_powerup(shape.type)
+					block.make_powerup(shape.type as Powerup.Type)
 					block.state = Block.State.IDLE
 				for matched_block: Block in matches:
 					matched_block.delete()
@@ -46,23 +69,34 @@ static func match_block(block: Block) -> bool:
 	return false
 
 
-static func match_line(coord: Vector2, type: Block.Type, facing: Vector2):
-	match_toward(coord, type, facing)
-	match_toward(coord, type, -facing)
+func match_line(offset: Vector2):
+	match_toward(offset)
+	match_toward(-offset)
 
 
-static func match_toward(where: Vector2, type: Block.Type, direction: Vector2):
-	where += direction * block_size
-	if match_single(where, type):
-		match_toward( where, type, direction)
+func match_toward(offset: Vector2):
+	while match_single(offset):
+		match_toward(offset+offset.sign())
 
 
-static func match_single(where: Vector2, type: Block.Type) -> bool:
-	var block := get_block.call( where ) as Block
-	if not block: return false
-	if block.is_powerup: return false
-	if not block.state == Block.State.IDLE: return false
-	if not block.type == type: return false
-	matches.append( block )
+func match_single(offset: Vector2) -> bool:
+	var matched_block := get_idle_block(offset)
+	if not matched_block or not block.type == matched_block.type: return false
+	matches.append(match_block)
 	return true
-	return false
+
+
+func get_idle_block(where: Vector2) -> Block:
+	var block := get_block(where)
+	if block.state==Block.State.IDLE: return null
+	if block.powerup: return null
+	return block
+
+
+func get_block(offset: Vector2) -> Block:
+	var params := PhysicsPointQueryParameters2D.new()
+	params.position = block.position + offset * block.size
+	var result: Array = get_world_2d().direct_space_state.intersect_point(params)
+	if result.is_empty(): return null
+	var node: Node = result.pop_back().collider
+	return node as Block if node is Block else null
