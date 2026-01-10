@@ -5,9 +5,9 @@
 [ext_resource type="Script" uid="uid://d3yq6lberjfy5" path="res://draggable.gd" id="3_mk58r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xfwl5"]
-size = Vector2(86, 130)
+size = Vector2(74, 142)
 
-[node name="Block" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "collider", "draggable")]
+[node name="Block" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "draggable", "collider")]
 disable_mode = 1
 input_pickable = true
 script = ExtResource("1_xfwl5")
@@ -16,17 +16,17 @@ type_colors = Dictionary[int, Color]({
 1: Color(1, 0.75, 0, 1),
 2: Color(0.14901961, 0.81960785, 0.14901961, 1),
 3: Color(1, 0.38039216, 0.38039216, 1),
-4: Color(0.5749333, 0.17599998, 0.88, 1)
+4: Color(0.6234919, 0.30061117, 1, 1)
 })
 sprite = NodePath("Sprite")
-collider = NodePath("CollisionShape2D")
 draggable = NodePath("Draggable")
+collider = NodePath("CollisionShape2D")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_xfwl5")
 
 [node name="Sprite" type="Sprite2D" parent="."]
-scale = Vector2(0.5, 0.50000006)
+scale = Vector2(0.5498745, 0.54987454)
 texture = ExtResource("2_5d32t")
 hframes = 7
 
@@ -34,18 +34,30 @@ hframes = 7
 script = ExtResource("3_mk58r")
 
 [node name="ButtonClose" type="Button" parent="."]
-offset_left = 19.0
-offset_top = -35.0
-offset_right = 45.0
-offset_bottom = -4.0
-scale = Vector2(0.6153771, 0.6137285)
+visible = false
+offset_left = 32.0
+offset_top = -54.0
+offset_right = 58.0
+offset_bottom = -23.0
+scale = Vector2(0.91580707, 0.9133536)
 text = " x "
 
+[node name="ButtonMatch" type="Button" parent="."]
+visible = false
+offset_left = 32.0
+offset_top = -20.000008
+offset_right = 58.0
+offset_bottom = 10.999992
+scale = Vector2(0.91580707, 0.9133536)
+text = "m"
+
 [node name="Name" type="Label" parent="."]
-offset_left = -37.0
-offset_top = -22.0
-offset_right = 37.0
-offset_bottom = 20.0
+visible = false
+offset_left = -56.0
+offset_top = -21.0
+offset_right = 0.37817383
+offset_bottom = 21.0
+scale = Vector2(1.4369158, 1.4369158)
 size_flags_vertical = 1
 theme_override_constants/outline_size = 9
 theme_override_font_sizes/font_size = 21
@@ -54,10 +66,12 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StateLabel" type="Label" parent="."]
-offset_left = -34.0
-offset_top = -37.0
-offset_right = 18.0
-offset_bottom = -14.0
+visible = false
+offset_left = -60.0
+offset_top = -61.0
+offset_right = -8.0
+offset_bottom = -38.0
+scale = Vector2(1.67523, 1.685782)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "STATE"
@@ -66,3 +80,4 @@ horizontal_alignment = 1
 [connection signal="input_event" from="." to="Draggable" method="_on_input_event"]
 [connection signal="mouse_exited" from="." to="Draggable" method="_on_mouse_exited"]
 [connection signal="pressed" from="ButtonClose" to="." method="delete"]
+[connection signal="pressed" from="ButtonMatch" to="." method="_on_button_match_pressed"]

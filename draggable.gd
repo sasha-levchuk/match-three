@@ -8,7 +8,6 @@ func _on_input_event(_viewport, event: InputEvent, _shape_idx):
 		if event.is_pressed() and block.state == Block.State.IDLE:
 			block.z_index += 1
 			block.state = Block.State.HELD
-			#Event.drag_started.emit(block)
 		if event.is_released() and block.state == Block.State.HELD:
 			if block.powerup:
 				block.powerup.trigger()
@@ -23,7 +22,7 @@ func _on_mouse_exited():
 	if block.state == Block.State.HELD:
 		var v := block.get_local_mouse_position()
 		v = Vector2(sign(v.x), 0) if abs(v.x) > abs(v.y) else Vector2(0, sign(v.y))
-		Event.swap_requested.emit( block, v )
+		Global.swap_requested.emit( block, v )
 
 
 func reset_position():

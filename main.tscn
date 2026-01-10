@@ -24,45 +24,42 @@ func _on_body_exited(body: Node2D):
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0xm2m"]
-size = Vector2(1173.625, 131.25)
+size = Vector2(1080.625, 131.25)
 
 [node name="Board" type="Node2D" node_paths=PackedStringArray("spawn_area")]
 script = ExtResource("1_h2yge")
 spawn_area = NodePath("SpawnArea")
 
 [node name="1" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(77, 71)
+position = Vector2(108, 98)
 
 [node name="2" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(206, 71)
+position = Vector2(252, 98)
 
 [node name="3" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(335, 71)
+position = Vector2(396, 98)
 
 [node name="4" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(464, 71)
+position = Vector2(540, 98)
 
 [node name="5" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(593, 71)
+position = Vector2(684, 98)
 
 [node name="6" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(722, 71)
+position = Vector2(828, 98)
 
 [node name="7" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(851, 71)
-
-[node name="8" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(980, 71)
+position = Vector2(972, 98)
 
 [node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(111, 620)
+position = Vector2(536, 1031)
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
 shape = SubResource("WorldBoundaryShape2D_0xm2m")
 
 [node name="SpawnArea" type="Area2D" parent="." node_paths=PackedStringArray("collider")]
-position = Vector2(341, -58)
+position = Vector2(341, -31)
 collision_layer = 0
 script = SubResource("GDScript_0xm2m")
 block_scene = ExtResource("1_0xm2m")
@@ -70,7 +67,7 @@ collider = NodePath("CollisionShape2D")
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpawnArea"]
-position = Vector2(245.1875, 16.375)
+position = Vector2(198.6875, 16.375)
 shape = SubResource("RectangleShape2D_0xm2m")
 
 [connection signal="body_exited" from="SpawnArea" to="SpawnArea" method="_on_body_exited"]

@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3 uid="uid://d217kg3j4yok6"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0xm2m"]
+bg_color = Color(1, 0, 0, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="GDScript" id="GDScript_h2yge"]
+resource_name = "red_dot"
+script/source = "extends Panel
+
+
+func _ready():
+	var tween := create_tween()
+	tween.tween_property(self, 'modulate:a', 0, 0.5)
+	tween.tween_callback(queue_free)
+
+
+func place(where: Vector2):
+	position = where
+	return self
+"
+
+[node name="RedDot" type="Panel"]
+visible = false
+z_index = 1
+offset_left = -15.0
+offset_top = -15.0
+offset_right = 15.0
+offset_bottom = 15.0
+pivot_offset = Vector2(15, 15)
+theme_override_styles/panel = SubResource("StyleBoxFlat_0xm2m")
+script = SubResource("GDScript_h2yge")

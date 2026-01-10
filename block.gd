@@ -42,7 +42,7 @@ func fall():
 var fall_time: float
 func _physics_process(delta):
 	fall_time += delta
-	var collision := move_and_collide(Vector2.DOWN * 80 * fall_time)
+	var collision := move_and_collide(Vector2.DOWN * 150 * fall_time)
 	if collision:
 		fall_time = 0
 		var body := collision.get_collider()
@@ -51,7 +51,15 @@ func _physics_process(delta):
 		if is_floor or block.state != State.FALLING:
 			set_physics_process(false)
 			state = State.IDLE
-			Event.block_landed.emit(self)
+			if powerup: return
+			Matcher.match_block(self)
+
+
+func delete_or_trigger():
+	if powerup and state==State.IDLE:
+		powerup.trigger()
+	else:
+		delete()
 
 
 func delete():
@@ -60,7 +68,7 @@ func delete():
 	tween.tween_property(self, 'modulate:a', 0, 0.1)
 	tween.tween_callback(func():
 		queue_free()
-		Event.block_deleted.emit(position)
+		Global.collapse_requested.emit(position + Vector2.UP * size)
 	)
 
 
@@ -80,7 +88,7 @@ func check_and_fall():
 	if not move_and_collide(Vector2.DOWN):
 		fall()
 		await get_tree().create_timer(0.05).timeout
-		Event.collapse_initiated.emit(position)
+		Global.collapse_requested.emit(position + Vector2.UP * size)
 	else:
 		state = State.IDLE
 
@@ -89,3 +97,7 @@ func make_powerup(_type: Powerup.Type):
 	powerup = Powerup.new(self, _type as Powerup.Type)
 	sprite.frame = 1 + _type as int
 	modulate = Color.WHITE
+
+
+func _on_button_match_pressed():
+	Matcher.match_block(self)

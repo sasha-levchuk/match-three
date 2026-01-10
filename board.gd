@@ -1,28 +1,19 @@
-class_name Board extends Node2D
-@onready var block_size: Vector2 = load("res://block.tscn").instantiate().collider.shape.size
+extends Node2D
+@onready var block_size: float = (load("res://block.tscn").instantiate() as Block).collider.shape.get_rect().size.y
 @export var spawn_area: Area2D
 
 
 func _ready():
-	Global.get_idle_block = get_idle_block
-	Global.block_size = block_size
-	Event.swap_requested.connect(_on_swap_requested)
-	Event.block_landed.connect(Matcher.match_block)
-	Event.block_deleted.connect(collapse_up_recursive)
-	Event.collapse_initiated.connect(collapse_up_recursive)
-	Event.block_queried.connect(func(where: Vector2):
-		
-		)
+	Global.swap_requested.connect(_on_swap_requested)
+	Global.collapse_requested.connect(_on_collapse_requested)
+	for i in INF:
+		await get_tree().create_timer(1).timeout
+		prints(i)
 
 
 func _on_swap_requested(block1: Block, direction: Vector2):
-	var block2 := get_block( block1.position + direction * block_size )
-	if ( not block2 or 
-		block2.is_queued_for_deletion() or
-		not is_instance_valid(block2) or
-		not block2.state==Block.State.IDLE
-	): 
-		return block1.draggable.reset_position()
+	var block2 := Global.get_block( block1.position + direction * block_size )
+	if not block2: return block1.draggable.reset_position()
 	block1.add_collision_exception_with(block2)
 	block1.move( block2.position )
 	await block2.move(block1.position)
@@ -40,41 +31,13 @@ func _on_swap_requested(block1: Block, direction: Vector2):
 		block2.check_and_fall()
 
 
-func _on_button_delete_all_pressed():
-	for child in get_children():
-		if child is Block:
-			child.delete()
-
-
-func collapse_up_recursive(where: Vector2):
-	where.y -= block_size.y
-	var block_above := get_block(where)
-	if block_above: 
-		if block_above.state == Block.State.IDLE:
-			block_above.fall()
+func _on_collapse_requested(where: Vector2):
+	var block := Global.get_block(where)
+	if block: 
+		if block.state == Block.State.IDLE:
+			block.fall()
 			await get_tree().create_timer(0.05).timeout
 		else:
 			return
 	if where.y > 0:
-		collapse_up_recursive(where)
-
-
-func get_block(where: Vector2) -> Block:
-	var params := PhysicsPointQueryParameters2D.new()
-	params.position = where
-	var result: Array = get_world_2d().direct_space_state.intersect_point(params)
-	if result.is_empty(): return null
-	var node: Node = result.pop_back().collider
-	return node as Block if node is Block else null
-
-
-func get_idle_block(where: Vector2) -> Block:
-	var block := get_block(where)
-	if block.state==Block.State.IDLE: return null
-	if block.powerup: return null
-	return block
-
-
-func get_all_blocks():
-	return get_children().filter(func(node): 
-		return node is Block and node.state==Block.State.IDLE and not node.powerup)
+		_on_collapse_requested(where + Vector2.UP * block_size)
