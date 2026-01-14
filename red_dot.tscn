@@ -24,7 +24,6 @@ func place(where: Vector2):
 "
 
 [node name="RedDot" type="Panel"]
-visible = false
 z_index = 1
 offset_left = -15.0
 offset_top = -15.0

@@ -1,3 +1,4 @@
+# TO DO: delay the matching if the piece above hasn't landed yet
 class_name Block extends PhysicsBody2D
 enum Type {
 	BLUE,
@@ -7,7 +8,7 @@ enum Type {
 	#PURPLE
 }
 var powerup: Powerup
-var type: Type = Type.values().pick_random() as Type
+@export var type: Type = Type.values().pick_random() as Type
 @export var type_colors: Dictionary[Type, Color]
 static var num_blocks := 0
 enum State{ FALLING, HELD, MOVING, MATCHING, RETURNING, DELETING, IDLE }
@@ -28,11 +29,14 @@ func _to_string(): return Type.keys()[type].left(1) + str(name)
 
 func _ready():
 	num_blocks = ( num_blocks + 1 ) % 1000
-	modulate = type_colors[type]
+	setup_color()
 	name = str(num_blocks).pad_zeros(3)
 	$Name.text = str(self)
 	fall()
 
+
+func setup_color():
+	modulate = type_colors[type]
 
 func fall():
 	state = State.FALLING
@@ -42,17 +46,16 @@ func fall():
 var fall_time: float
 func _physics_process(delta):
 	fall_time += delta
-	var collision := move_and_collide(Vector2.DOWN * 150 * fall_time)
-	if collision:
-		fall_time = 0
-		var body := collision.get_collider()
-		var block := body as Block if body is Block else null
-		var is_floor := not block
-		if is_floor or block.state != State.FALLING:
-			set_physics_process(false)
-			state = State.IDLE
-			if powerup: return
-			Matcher.match_block(self)
+	var collision := move_and_collide(Vector2.DOWN * 200 * fall_time)
+	if not collision: return
+	fall_time = 0
+	var body := collision.get_collider()
+	if body is Block:
+		var block_below := body as Block
+		if block_below.state == State.FALLING: return
+		Matcher.match_block(self)
+	set_physics_process(false)
+	state = State.IDLE
 
 
 func delete_or_trigger():

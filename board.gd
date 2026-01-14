@@ -7,8 +7,8 @@ func _ready():
 	Global.swap_requested.connect(_on_swap_requested)
 	Global.collapse_requested.connect(_on_collapse_requested)
 	for i in INF:
-		await get_tree().create_timer(1).timeout
-		prints(i)
+		await get_tree().create_timer(5).timeout
+		prints(i*5)
 
 
 func _on_swap_requested(block1: Block, direction: Vector2):
