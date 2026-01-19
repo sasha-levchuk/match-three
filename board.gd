@@ -18,8 +18,8 @@ func _on_swap_requested(block1: Block, direction: Vector2):
 	block1.move( block2.position )
 	await block2.move(block1.position)
 	for i in 6: await get_tree().physics_frame
-	var match1 := Matcher.match_block(block1)
-	var match2 := Matcher.match_block(block2)
+	var match1 := Matcher.match_block_drag(block1)
+	var match2 := Matcher.match_block_drag(block2)
 	if not match1 and not match2:
 		block1.move( block2.position )
 		await block2.move( block1.position )

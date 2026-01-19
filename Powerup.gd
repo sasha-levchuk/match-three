@@ -1,5 +1,12 @@
 class_name Powerup
-enum Type {DISCOBALL, TNT, ROCKETV, ROCKETH, FAN, NONE}
+enum Type {
+	DISCOBALL, 
+	TNT, 
+	ROCKETV, 
+	ROCKETH, 
+	FAN, 
+	NONE,
+	}
 var type: Type
 var block: Block # kinda like "this" of the component
 

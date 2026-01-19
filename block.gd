@@ -38,6 +38,7 @@ func _ready():
 func setup_color():
 	modulate = type_colors[type]
 
+
 func fall():
 	state = State.FALLING
 	set_physics_process(true)
@@ -53,7 +54,7 @@ func _physics_process(delta):
 	if body is Block:
 		var block_below := body as Block
 		if block_below.state == State.FALLING: return
-		Matcher.match_block(self)
+		Matcher.match_block_fall(self)
 	set_physics_process(false)
 	state = State.IDLE
 
@@ -68,7 +69,7 @@ func delete_or_trigger():
 func delete():
 	state = State.DELETING
 	var tween := create_tween()
-	tween.tween_property(self, 'modulate:a', 0, 0.1)
+	tween.tween_property(self, 'modulate:a', 0, .1)
 	tween.tween_callback(func():
 		queue_free()
 		Global.collapse_requested.emit(position + Vector2.UP * size)
@@ -97,9 +98,13 @@ func check_and_fall():
 
 
 func make_powerup(_type: Powerup.Type):
+	if _type == Powerup.Type.NONE:
+		delete()
+		return
 	powerup = Powerup.new(self, _type as Powerup.Type)
 	sprite.frame = 1 + _type as int
 	modulate = Color.WHITE
+	check_and_fall()
 
 
 func _on_button_match_pressed():

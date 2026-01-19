@@ -21,7 +21,7 @@ func get_block(where: Vector2) -> Block:
 
 
 func get_block_ray(from: Vector2, to: Vector2) -> Block:
-	var params := PhysicsRayQueryParameters2D.create(from, from + to * 9999)
+	var params := PhysicsRayQueryParameters2D.create(from, from + to)
 	var result := get_world_2d().direct_space_state.intersect_ray(params)
 	if result.is_empty(): return null
 	return result.collider as Block

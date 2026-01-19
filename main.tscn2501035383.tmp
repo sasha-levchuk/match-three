@@ -23,21 +23,22 @@ func _on_body_exited(body: Node2D):
 	new_block.position = Vector2(x, position.y)
 "
 
-[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_h2yge"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0xm2m"]
+size = Vector2(1080.625, 131.25)
 
 [node name="Board" type="Node2D" node_paths=PackedStringArray("spawn_area")]
 script = ExtResource("1_h2yge")
 spawn_area = NodePath("SpawnArea")
 
 [node name="Block" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(0.3019608, 0.4862745, 1, 1)
-position = Vector2(92, 88)
-type = 0
+modulate = Color(1, 0.75, 0, 1)
+position = Vector2(93, 86)
+type = 1
 
 [node name="Block2" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(0.14901961, 0.81960785, 0.14901961, 1)
-position = Vector2(236, 87)
-type = 2
+modulate = Color(0.3019608, 0.4862745, 1, 1)
+position = Vector2(237, 86)
+type = 0
 
 [node name="Block3" parent="." instance=ExtResource("1_0xm2m")]
 modulate = Color(1, 0.38039216, 0.38039216, 1)
@@ -46,32 +47,17 @@ type = 3
 
 [node name="Block4" parent="." instance=ExtResource("1_0xm2m")]
 modulate = Color(0.3019608, 0.4862745, 1, 1)
-position = Vector2(93, 244)
+position = Vector2(93, 242)
 type = 0
 
 [node name="Block5" parent="." instance=ExtResource("1_0xm2m")]
 modulate = Color(1, 0.75, 0, 1)
-position = Vector2(236, 243)
+position = Vector2(237, 242)
 type = 1
 
 [node name="Block6" parent="." instance=ExtResource("1_0xm2m")]
 modulate = Color(0.14901961, 0.81960785, 0.14901961, 1)
 position = Vector2(381, 242)
-type = 2
-
-[node name="Block10" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(0.3019608, 0.4862745, 1, 1)
-position = Vector2(526, 85)
-type = 0
-
-[node name="Block11" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(1, 0.75, 0, 1)
-position = Vector2(669, 84)
-type = 1
-
-[node name="Block12" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(0.14901961, 0.81960785, 0.14901961, 1)
-position = Vector2(814, 83)
 type = 2
 
 [node name="Block7" parent="." instance=ExtResource("1_0xm2m")]
@@ -85,24 +71,19 @@ position = Vector2(237, 399)
 type = 0
 
 [node name="Block9" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(0.3019608, 0.4862745, 1, 1)
-position = Vector2(381, 399)
-type = 0
-
-[node name="Block13" parent="." instance=ExtResource("1_0xm2m")]
 modulate = Color(1, 0.38039216, 0.38039216, 1)
-position = Vector2(959, 82)
+position = Vector2(381, 399)
 type = 3
 
 [node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(540, 1062)
+position = Vector2(554, 494)
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
 shape = SubResource("WorldBoundaryShape2D_0xm2m")
 
 [node name="SpawnArea" type="Area2D" parent="." node_paths=PackedStringArray("collider")]
-position = Vector2(528, -43)
+position = Vector2(341, -10)
 collision_layer = 0
 script = SubResource("GDScript_0xm2m")
 block_scene = ExtResource("1_0xm2m")
@@ -110,8 +91,7 @@ collider = NodePath("CollisionShape2D")
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpawnArea"]
-position = Vector2(0, 116)
-rotation = 3.1415927
-shape = SubResource("WorldBoundaryShape2D_h2yge")
+position = Vector2(198.6875, 16.375)
+shape = SubResource("RectangleShape2D_0xm2m")
 
 [connection signal="body_exited" from="SpawnArea" to="SpawnArea" method="_on_body_exited"]
