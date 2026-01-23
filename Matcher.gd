@@ -1,108 +1,101 @@
 extends Node
 var block: Block
 var matches: Array[Block]
-var cluster: Dictionary[Vector2, Block]
 var handlers: Dictionary[Powerup.Type, Callable] = {
 	Powerup.Type.DISCOBALL: func(coord: Vector2) -> bool:
-		for offset: Vector2 in [Vector2.DOWN, Vector2.RIGHT]:
+		for offset: Vector2i in [Vector2i.DOWN, Vector2i.RIGHT]:
 			matches.clear()
 			if match_toward(coord, offset) >= 2 and match_toward(coord, -offset) >= 2:
-				match_toward(coord, offset.orthogonal())
-				match_toward(coord, -offset.orthogonal())
+				match_line(coord, Vector2i(Vector2(offset).orthogonal()))
 				prints('discoball matched')
 				return true
 		return false,
-	Powerup.Type.TNT: func(coord: Vector2) -> bool:
-		return match_line(coord,Vector2.UP)>=2 and match_line(coord,Vector2.RIGHT)>=2,
-	Powerup.Type.ROCKETH: func(coord: Vector2) -> bool:
-		return match_line(coord,Vector2.UP)>=3,
-	Powerup.Type.ROCKETV: func(coord: Vector2) -> bool:
-		return match_line(coord,Vector2.RIGHT)>=3,
-	Powerup.Type.FAN: func(coord: Vector2) -> bool:
-		prints('fan matching at', coord, cluster)
-		for i in 4:
-			prints('iteration', i)
+	Powerup.Type.TNT: func(coord: Vector2i) -> bool:
+		return match_line(coord,Vector2i.UP)>=2 and match_line(coord,Vector2i.RIGHT)>=2,
+	Powerup.Type.ROCKETH: func(coord: Vector2i) -> bool:
+		return match_line(coord,Vector2i.UP)>=3,
+	Powerup.Type.ROCKETV: func(coord: Vector2i) -> bool:
+		return match_line(coord,Vector2i.RIGHT)>=3,
+	Powerup.Type.FAN: func(coord: Vector2i) -> bool:
+		var match_quadrant := func(quadrant: int):
 			matches.clear()
-			for offset: Vector2 in [Vector2.RIGHT, Vector2.ONE, Vector2.DOWN]:
-				var pos := coord + Vector2( Vector2i( offset.rotated(i*PI*.5) ) )
-				prints('offset', offset, 'pos', pos, cluster.get(pos))
-				if cluster.has(pos): 
-					prints('fan matched at offsset', offset, 'rotated', pos)
-					matches.append(cluster[pos])
-				if matches.size() >= 3:
-					for optional: Vector2 in [Vector2.LEFT, Vector2.UP, Vector2.RIGHT*2, Vector2.DOWN*2]:
-						pos = coord + Vector2( Vector2i( optional.rotated(i*PI*.5) ) )
-						if cluster.has(pos): matches.append(cluster[pos])
-					return true
+			for i: int in 3:
+				var offset := Vector2i(Vector2(0,1.9).rotated((quadrant*2+i)*TAU/8))
+				var b: Block = cluster.get(coord+offset)
+				prints('quadrant', quadrant, 'cell', offset, b)
+				if not b: return false
+				matches.append(cluster[coord+offset])
+			for i in 4: # don't ask
+				var offset := Vector2i(Vector2(.5,.5).rotated(quadrant*TAU/4)+\
+					Vector2(1.6,0).rotated((quadrant+i)*TAU/4))
+				if cluster.has(coord+offset):
+					matches.append(cluster[coord+offset])
+			return true
+		for quadrant: int in 4:
+			if match_quadrant.call(quadrant):
+				return true
 		return false,
-	Powerup.Type.NONE: func(coord: Vector2) -> bool:
-		for offset: Vector2 in [Vector2.RIGHT, Vector2.DOWN]:
-			if match_line(coord, offset)>=2:
+	Powerup.Type.NONE: func(coord: Vector2i) -> bool:
+		for v in [Vector2i.RIGHT, Vector2i.DOWN]:
+			matches.clear()
+			if match_line(coord, v)>=2:
 				return true
 		return false
 }
 
 
-func gather_cluster(should_wait_falling: bool):
-	cluster.clear()
-	cluster[Vector2.ZERO] = block
-	var unexplored: Array[Vector2] = [Vector2.ZERO]
-	while unexplored:
-		var center := unexplored.pop_back() as Vector2
-		for offset: Vector2 in [Vector2.LEFT, Vector2.UP, Vector2.RIGHT, Vector2.DOWN]:
-			var new_coord := center + offset
-			if cluster.has(new_coord): continue
-			var world_coord := block.position + center * block.size
-			var where_to := offset*block.size
-			if offset==Vector2.UP: where_to *= 3
-			var neighbour := Global.get_block_ray(world_coord, where_to)
-			if not neighbour or neighbour.powerup: continue
-			if neighbour.type != block.type: continue
-			if neighbour.state == Block.State.IDLE:
-				prints(block, 'found neighbour', neighbour, 'at', new_coord, 'offset', offset)
-				cluster[new_coord] = neighbour
-				unexplored.append(new_coord)
-			if should_wait_falling and \
-			neighbour.state == Block.State.FALLING and \
-			offset==Vector2.UP:
-				prints('the cluster is unfinished, halting')
-				return false
-	prints('cluster', cluster)
-
-
+var cluster: Dictionary[Vector2i, Block] = {}
 func match_block_drag(_block: Block) -> bool:
 	block = _block
-	prints('============')
-	prints('dragging', block)
-	gather_cluster(false)
-	for powerup_type: Powerup.Type in handlers:
-		matches.clear()
-		if handlers[powerup_type].call(Vector2.ZERO):
-			prints('matched powerup type', Powerup.Type.keys()[powerup_type])
-			for matched_block: Block in matches:
-				matched_block.delete()
-			block.make_powerup(powerup_type)
+	cluster.clear()
+	gather_neighbors(block, Vector2i.ZERO, false)
+	prints(block, 'cluster', cluster)
+	for type: Powerup.Type in handlers:
+		if match_in_cluster(type):
 			return true
 	return false
 
 
 func match_block_fall(_block: Block):
 	block = _block
-	gather_cluster(true)
-	for coord: Vector2 in cluster:
-		for powerup_type: Powerup.Type in handlers:
-			matches.clear()
-			if handlers[powerup_type].call(coord):
-				cluster[coord].make_powerup(powerup_type)
-				for matched_block: Block in matches:
-					matched_block.delete()
+	prints('')
+	prints('cluster has been cleared')
+	cluster.clear()
+	if not gather_neighbors(block, Vector2i.ZERO, true): return
+	for type: Powerup.Type in handlers:
+		for coord: Vector2i in cluster:
+			if match_in_cluster(type, coord): return
 
 
-func match_line(center: Vector2, offset: Vector2) -> int:
+func gather_neighbors(central_block: Block, coord: Vector2i, wait_falling: bool):
+	cluster[coord] = central_block
+	for offset: Vector2i in [Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN]:
+		if cluster.has(coord+offset): continue
+		var neighbor := central_block.get_neighbor(offset)
+		if not neighbor or neighbor.powerup or neighbor.type!=block.type: continue
+		if neighbor.state == Block.State.IDLE:
+			if not gather_neighbors(neighbor, coord+offset, wait_falling):
+				return false # propagate the terminating condition upwards
+		elif wait_falling and neighbor.state == Block.State.FALLING:
+			prints('block', neighbor, 'is falling, cluster is unfinished')
+			return false
+	return true
+
+
+func match_in_cluster(type: Powerup.Type, coord := Vector2i.ZERO) -> bool:
+	matches.clear()
+	if not handlers[type].call(coord): return false
+	prints('matched', Powerup.str(type), matches, 'in cluster', cluster)
+	cluster[coord].make_powerup(type)
+	for b: Block in matches: b.delete()
+	return true
+
+
+func match_line(center: Vector2i, offset: Vector2i) -> int:
 	return match_toward(center, offset, match_toward(center, -offset))
 
 
-func match_toward(center: Vector2, offset: Vector2, i:=0) -> int:
+func match_toward(center: Vector2i, offset: Vector2i, i:=0) -> int:
 	while cluster.has(center+offset):
 		matches.append(cluster[center+offset])
 		offset += offset.sign()

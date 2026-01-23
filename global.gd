@@ -1,30 +1,9 @@
-extends Node2D
+extends Node
 var get_idle_block: Callable
 signal swap_requested
 signal collapse_requested
-@onready var red_dot := preload("res://red_dot.tscn")
-
-
-func get_block(where: Vector2) -> Block:
-	add_child(red_dot.instantiate().place(where))
-	var params := PhysicsPointQueryParameters2D.new()
-	params.position = where
-	var result: Array = get_world_2d().direct_space_state.intersect_point(params)
-	if result.is_empty(): return null
-	var node: Node = result.pop_back().collider
-	if not node is Block: return null
-	var block := node as Block
-	if block.state != Block.State.IDLE: return null
-	if block.is_queued_for_deletion(): return null
-	if not is_instance_valid(block): return null
-	return block
-
-
-func get_block_ray(from: Vector2, to: Vector2) -> Block:
-	var params := PhysicsRayQueryParameters2D.create(from, from + to)
-	var result := get_world_2d().direct_space_state.intersect_ray(params)
-	if result.is_empty(): return null
-	return result.collider as Block
+signal collapse_button_pressed
+signal discoball_triggered
 
 
 func pause(time: float):

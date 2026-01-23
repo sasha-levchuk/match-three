@@ -28,9 +28,8 @@ func _on_mouse_exited():
 func reset_position():
 	block.state = Block.State.RETURNING
 	var tween := create_tween()
-	tween.tween_property( block.sprite, 'position', Vector2.ZERO, 0.2 )
+	tween.tween_property(block.sprite, 'position', Vector2.ZERO, 0.2)
 	tween.tween_callback(func():
 		block.z_index = 0
-		block.state = Block.State.IDLE
-		block.check_and_fall()
+		block.fall()
 	)

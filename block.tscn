@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://b6b77187swjoj"]
+[gd_scene load_steps=8 format=3 uid="uid://b6b77187swjoj"]
 
 [ext_resource type="Script" uid="uid://bygncfy4y7ql6" path="res://block.gd" id="1_xfwl5"]
 [ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="2_5d32t"]
@@ -7,7 +7,38 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xfwl5"]
 size = Vector2(74, 142)
 
+[sub_resource type="GDScript" id="GDScript_5d32t"]
+resource_name = "dot"
+script/source = "extends Line2D
+
+
+func place(where: Vector2):
+	var tween := create_tween()
+	tween.tween_property(self, 'modulate:a', 0, 1.5).from(1)
+	tween.tween_callback(queue_free)
+	global_position = where
+	return self
+"
+
+[sub_resource type="Curve" id="Curve_5d32t"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="GDScript" id="GDScript_mk58r"]
+resource_name = "line"
+script/source = "extends Line2D
+
+
+func place(start: Vector2, end: Vector2):
+	var tween := create_tween()
+	tween.tween_property(self, 'modulate:a', 0, 1.5).from(1)
+	points[0] = start
+	points[1] = end
+	return self
+"
+
 [node name="Block" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "draggable", "collider")]
+modulate = Color(0.66, 0.66, 0.66, 1)
 disable_mode = 1
 input_pickable = true
 script = ExtResource("1_xfwl5")
@@ -34,6 +65,7 @@ hframes = 7
 script = ExtResource("3_mk58r")
 
 [node name="ButtonClose" type="Button" parent="."]
+visible = false
 offset_left = 32.0
 offset_top = -54.0
 offset_right = 58.0
@@ -42,6 +74,7 @@ scale = Vector2(0.91580707, 0.9133536)
 text = " x "
 
 [node name="ButtonMatch" type="Button" parent="."]
+visible = false
 offset_left = 32.0
 offset_top = -20.000008
 offset_right = 58.0
@@ -50,6 +83,7 @@ scale = Vector2(0.91580707, 0.9133536)
 text = "m"
 
 [node name="Name" type="Label" parent="."]
+visible = false
 offset_left = -56.0
 offset_top = -21.0
 offset_right = 0.37817383
@@ -63,6 +97,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StateLabel" type="Label" parent="."]
+visible = false
 offset_left = -60.0
 offset_top = -61.0
 offset_right = -8.0
@@ -72,6 +107,31 @@ theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 15
 text = "STATE"
 horizontal_alignment = 1
+
+[node name="Dot" type="Line2D" parent="."]
+visible = false
+top_level = true
+position = Vector2(40, 29)
+points = PackedVector2Array(0, 0, 0, 0.1)
+closed = true
+width = 25.0
+default_color = Color(1, 0, 0, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+script = SubResource("GDScript_5d32t")
+
+[node name="Line" type="Line2D" parent="."]
+visible = false
+top_level = true
+points = PackedVector2Array(0, 0, 0, 7.1)
+width = 15.0
+width_curve = SubResource("Curve_5d32t")
+default_color = Color(1, 0, 0, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+script = SubResource("GDScript_mk58r")
 
 [connection signal="input_event" from="." to="Draggable" method="_on_input_event"]
 [connection signal="mouse_exited" from="." to="Draggable" method="_on_mouse_exited"]

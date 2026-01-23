@@ -11,6 +11,10 @@ var type: Type
 var block: Block # kinda like "this" of the component
 
 
+static func str(t: Type):
+	return Type.keys()[t]
+
+
 func _init(_block: Block, _type: Type):
 	type = _type
 	block = _block
@@ -19,12 +23,11 @@ func _init(_block: Block, _type: Type):
 func trigger():
 	block.sprite.frame = 6
 	block.delete()
+	if type==Type.DISCOBALL:
+		Global.discoball_triggered.emit(Block.Type.values().pick_random() as Block.Type)
+		return
 	var offsets: Array[Vector2]
 	match type:
-		Type.DISCOBALL:
-			for x in 20:
-				for y in 20:
-					offsets.append(Vector2(x-10, y-10))
 		Type.TNT:
 			for x in 5:
 				for y in 5:
@@ -37,13 +40,5 @@ func trigger():
 				offsets.append(Vector2(x-10, 0))
 		Type.FAN:
 			offsets.append_array([Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT])
-
-	var random_type := Block.Type.values().pick_random() as Block.Type
-	for offset: Vector2 in offsets:
-		var block2 := Global.get_block(block.position + offset*block.size)
-		if block2: # might optimize this later on
-			if type==Type.DISCOBALL:
-				if block2.type == random_type and not block2.powerup:
-					block2.delete()
-			else:
-				block2.delete_or_trigger()
+	for offset: Vector2i in offsets:
+		block.get_block_at(offset, func(b: Block): b.delete_or_trigger())
