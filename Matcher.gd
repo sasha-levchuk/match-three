@@ -7,7 +7,6 @@ var handlers: Dictionary[Powerup.Type, Callable] = {
 			matches.clear()
 			if match_toward(coord, offset) >= 2 and match_toward(coord, -offset) >= 2:
 				match_line(coord, Vector2i(Vector2(offset).orthogonal()))
-				prints('discoball matched')
 				return true
 		return false,
 	Powerup.Type.TNT: func(coord: Vector2i) -> bool:
@@ -22,7 +21,6 @@ var handlers: Dictionary[Powerup.Type, Callable] = {
 			for i: int in 3:
 				var offset := Vector2i(Vector2(0,1.9).rotated((quadrant*2+i)*TAU/8))
 				var b: Block = cluster.get(coord+offset)
-				prints('quadrant', quadrant, 'cell', offset, b)
 				if not b: return false
 				matches.append(cluster[coord+offset])
 			for i in 4: # don't ask
@@ -49,7 +47,6 @@ func match_block_drag(_block: Block) -> bool:
 	block = _block
 	cluster.clear()
 	gather_neighbors(block, Vector2i.ZERO, false)
-	prints(block, 'cluster', cluster)
 	for type: Powerup.Type in handlers:
 		if match_in_cluster(type):
 			return true
@@ -58,10 +55,10 @@ func match_block_drag(_block: Block) -> bool:
 
 func match_block_fall(_block: Block):
 	block = _block
-	prints('')
-	prints('cluster has been cleared')
 	cluster.clear()
+	prints('matching block', block)
 	if not gather_neighbors(block, Vector2i.ZERO, true): return
+	prints('cluster', cluster)
 	for type: Powerup.Type in handlers:
 		for coord: Vector2i in cluster:
 			if match_in_cluster(type, coord): return
@@ -72,12 +69,12 @@ func gather_neighbors(central_block: Block, coord: Vector2i, wait_falling: bool)
 	for offset: Vector2i in [Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN]:
 		if cluster.has(coord+offset): continue
 		var neighbor := central_block.get_neighbor(offset)
-		if not neighbor or neighbor.powerup or neighbor.type!=block.type: continue
+		if not neighbor or neighbor.powerup: continue
+		if neighbor.matchable.type != block.matchable.type: continue
 		if neighbor.state == Block.State.IDLE:
 			if not gather_neighbors(neighbor, coord+offset, wait_falling):
 				return false # propagate the terminating condition upwards
 		elif wait_falling and neighbor.state == Block.State.FALLING:
-			prints('block', neighbor, 'is falling, cluster is unfinished')
 			return false
 	return true
 
@@ -85,7 +82,6 @@ func gather_neighbors(central_block: Block, coord: Vector2i, wait_falling: bool)
 func match_in_cluster(type: Powerup.Type, coord := Vector2i.ZERO) -> bool:
 	matches.clear()
 	if not handlers[type].call(coord): return false
-	prints('matched', Powerup.str(type), matches, 'in cluster', cluster)
 	cluster[coord].make_powerup(type)
 	for b: Block in matches: b.delete()
 	return true

@@ -31,56 +31,34 @@ resource_name = "collapse"
 script/source = "extends Button
 
 
-func recursion_test(result:=[]):
-	var my_int := randi()%100
-	if my_int < 90:
-		result.append(my_int)
-		return result
-
-
 func _on_pressed():
-	prints(recursion_test())
-	#Global.collapse_button_pressed.emit()
+	pass
 "
 
 [node name="Board" type="Node2D" node_paths=PackedStringArray("spawn_area")]
 script = ExtResource("1_h2yge")
 spawn_area = NodePath("SpawnArea")
 
-[node name="Block4" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(1, 0.75, 0, 1)
-position = Vector2(812, 90)
-type = 1
-
 [node name="Block10" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(0.3019608, 0.4862745, 1, 1)
 position = Vector2(90, 89)
-type = 0
+
+[node name="Block4" parent="." instance=ExtResource("1_0xm2m")]
+position = Vector2(812, 90)
 
 [node name="Block11" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(1, 0.38039216, 0.38039216, 1)
 position = Vector2(233, 88)
-type = 3
 
 [node name="Block12" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(0.14901961, 0.81960785, 0.14901961, 1)
 position = Vector2(378, 87)
-type = 2
 
 [node name="Block13" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(0.3019608, 0.4862745, 1, 1)
 position = Vector2(956, 90)
-type = 0
 
 [node name="Block14" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(0.3019608, 0.4862745, 1, 1)
 position = Vector2(522, 89)
-type = 0
 
 [node name="Block15" parent="." instance=ExtResource("1_0xm2m")]
-modulate = Color(1, 0.75, 0, 1)
 position = Vector2(667, 89)
-type = 1
 
 [node name="Floor" type="StaticBody2D" parent="."]
 position = Vector2(151, 1063)

@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://b6b77187swjoj"]
+[gd_scene load_steps=9 format=3 uid="uid://b6b77187swjoj"]
 
 [ext_resource type="Script" uid="uid://bygncfy4y7ql6" path="res://block.gd" id="1_xfwl5"]
 [ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="2_5d32t"]
-[ext_resource type="Script" uid="uid://d3yq6lberjfy5" path="res://draggable.gd" id="3_mk58r"]
+[ext_resource type="Script" uid="uid://c8n8xadwr2jvg" path="res://Matchable.gd" id="3_e2bb5"]
+[ext_resource type="Script" uid="uid://d3yq6lberjfy5" path="res://Draggable.gd" id="3_mk58r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xfwl5"]
 size = Vector2(74, 142)
@@ -37,20 +38,13 @@ func place(start: Vector2, end: Vector2):
 	return self
 "
 
-[node name="Block" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "draggable", "collider")]
-modulate = Color(0.66, 0.66, 0.66, 1)
+[node name="Block" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "draggable", "matchable", "collider")]
 disable_mode = 1
 input_pickable = true
 script = ExtResource("1_xfwl5")
-type_colors = Dictionary[int, Color]({
-0: Color(0.3019608, 0.4862745, 1, 1),
-1: Color(1, 0.75, 0, 1),
-2: Color(0.14901961, 0.81960785, 0.14901961, 1),
-3: Color(1, 0.38039216, 0.38039216, 1),
-4: Color(0.6234919, 0.30061117, 1, 1)
-})
 sprite = NodePath("Sprite")
 draggable = NodePath("Draggable")
+matchable = NodePath("Matchable")
 collider = NodePath("CollisionShape2D")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -59,7 +53,16 @@ shape = SubResource("RectangleShape2D_xfwl5")
 [node name="Sprite" type="Sprite2D" parent="."]
 scale = Vector2(0.5498745, 0.54987454)
 texture = ExtResource("2_5d32t")
-hframes = 7
+hframes = 5
+vframes = 3
+
+[node name="Matchable" type="Sprite2D" parent="."]
+scale = Vector2(0.5498745, 0.54987454)
+texture = ExtResource("2_5d32t")
+hframes = 5
+vframes = 3
+frame = 1
+script = ExtResource("3_e2bb5")
 
 [node name="Draggable" type="Node" parent="."]
 script = ExtResource("3_mk58r")

@@ -6,11 +6,6 @@ extends Node2D
 func _ready():
 	Global.collapse_requested.connect(_on_collapse_requested)
 	Global.swap_requested.connect(_on_swap_requested)
-	for q in 4:
-		print(q)
-		for i in 3:
-			var offset := Vector2i(Vector2(0,1.9).rotated((q*2+i)*TAU/8))
-			print(offset)
 	for i in INF:
 		await get_tree().create_timer(5).timeout
 		prints(i*5)
@@ -28,7 +23,7 @@ func _on_swap_requested(block1: Block, direction: Vector2i):
 	var block2 := block1.get_neighbor(direction)
 	if not block2: return block1.draggable.reset_position()
 	block1.add_collision_exception_with(block2)
-	#test whether the move actually starts immediately changing the position
+	#test whether the move actually starts changing the position immediately
 	block1.move( block2.position )
 	await block2.move(block1.position)
 	for i in 6: await get_tree().physics_frame

@@ -8,6 +8,7 @@ enum Type {
 	NONE,
 	}
 var type: Type
+var frame_offset := 5
 var block: Block # kinda like "this" of the component
 
 
@@ -18,13 +19,14 @@ static func str(t: Type):
 func _init(_block: Block, _type: Type):
 	type = _type
 	block = _block
+	block.sprite.frame = frame_offset + type as int
 
 
 func trigger():
-	block.sprite.frame = 6
+	block.sprite.frame = 10
 	block.delete()
 	if type==Type.DISCOBALL:
-		Global.discoball_triggered.emit(Block.Type.values().pick_random() as Block.Type)
+		Global.discoball_triggered.emit(Matchable.Type.values().pick_random())
 		return
 	var offsets: Array[Vector2]
 	match type:

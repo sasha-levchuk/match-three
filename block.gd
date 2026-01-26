@@ -1,56 +1,46 @@
 # TO DO: delay the matching if the piece above hasn't landed yet
 class_name Block extends PhysicsBody2D
-enum Type {
-	BLUE,
-	YELLOW,
-	GREEN,
-	RED,
-	#PURPLE
-}
 var powerup: Powerup
-@export var type: Type = Type.values().pick_random() as Type
-@export var type_colors: Dictionary[Type, Color]
-static var num_blocks := 0
 enum State{ FALLING, HELD, MOVING, MATCHING, RETURNING, DELETING, IDLE }
 @onready var state: State:
-	set( new_state):
+	set(new_state):
 		state = new_state
 		$StateLabel.text = state_str
 var state_str: String: 
-	get(): return Block.State.keys()[state]
+	get: return Block.State.keys()[state]
 var pos_simple: Vector2i: 
-	get(): return position / size as Vector2i
+	get: return position / size as Vector2i
 @export var sprite: Sprite2D
 @export var draggable: Draggable
+@export var matchable: Matchable
+#@export var match_type: Matchable.Type:
+	#get: return matchable.type
+	#set(v): matchable.type = v
 @export var collider: CollisionShape2D
 @onready var size: float = collider.shape.size.y
-func _to_string(): return Type.keys()[type].left(1) + str(name) 
+func _to_string(): return str(name)
+signal fell_down
+static var num_blocks := 0
+
 
 
 func _ready():
 	num_blocks = ( num_blocks + 1 ) % 1000
-	setup_color()
-	name = str(num_blocks).pad_zeros(3)
+	name += str(num_blocks).pad_zeros(3)
 	$Name.text = str(self)
-
-
-func setup_color():
-	modulate = type_colors[type]
 
 
 var fall_time: float
 func _physics_process(delta):
 	fall_time += delta
 	var collision := move_and_collide(Vector2.DOWN * 200 * fall_time)
-	if not collision: 
-		return
+	if not collision: return
 	fall_time = 0
 	var body := collision.get_collider()
-	if body is Block and body.state == State.FALLING: 
-		return
-	Matcher.match_block_fall(self)
+	if body is Block and body.state == State.FALLING: return
 	set_physics_process(false)
 	state = State.IDLE
+	fell_down.emit()
 
 
 func delete_or_trigger():
@@ -87,9 +77,9 @@ func make_powerup(_type: Powerup.Type):
 	if _type == Powerup.Type.NONE:
 		delete()
 		return
+	matchable.modulate.a = 0
 	powerup = Powerup.new(self, _type as Powerup.Type)
-	sprite.frame = 1 + _type as int
-	modulate = Color.WHITE
+	#sprite.frame = 1 + _type as int
 	if move_and_collide(Vector2.DOWN):
 		state = State.IDLE
 	else:
