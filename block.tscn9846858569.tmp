@@ -1,14 +1,12 @@
-[gd_scene load_steps=12 format=3 uid="uid://b6b77187swjoj"]
+[gd_scene load_steps=10 format=3 uid="uid://b6b77187swjoj"]
 
-[ext_resource type="Script" uid="uid://b8gn2cmre4vnf" path="res://Raycaster.gd" id="1_e2bb5"]
 [ext_resource type="Script" uid="uid://bygncfy4y7ql6" path="res://block.gd" id="1_xfwl5"]
 [ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="2_5d32t"]
-[ext_resource type="Script" uid="uid://2yxo5hbundy3" path="res://Gravity.gd" id="2_5npld"]
 [ext_resource type="Script" uid="uid://c8n8xadwr2jvg" path="res://Matchable.gd" id="3_e2bb5"]
 [ext_resource type="Script" uid="uid://d3yq6lberjfy5" path="res://Draggable.gd" id="3_mk58r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xfwl5"]
-size = Vector2(98, 150)
+size = Vector2(74, 142)
 
 [sub_resource type="GDScript" id="GDScript_5d32t"]
 resource_name = "dot"
@@ -47,50 +45,37 @@ corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
-[node name="Block" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "draggable", "matchable", "gravity", "raycaster", "collider")]
+[node name="Block" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "draggable", "matchable", "collider")]
 disable_mode = 1
 input_pickable = true
 script = ExtResource("1_xfwl5")
 sprite = NodePath("Sprite")
 draggable = NodePath("Draggable")
-matchable = NodePath("Matchable")
-gravity = NodePath("Gravity")
-raycaster = NodePath("Raycaster")
+matchable = NodePath("Sprite/MatchableSprite")
 collider = NodePath("CollisionShape2D")
-
-[node name="Raycaster" type="Node" parent="."]
-script = ExtResource("1_e2bb5")
-
-[node name="Matchable" type="Node" parent="."]
-script = ExtResource("3_e2bb5")
-
-[node name="MatchableSprite" type="Sprite2D" parent="Matchable"]
-unique_name_in_owner = true
-scale = Vector2(0.56999993, 0.56999993)
-texture = ExtResource("2_5d32t")
-hframes = 5
-vframes = 3
-frame = 1
-
-[node name="Draggable" type="Node" parent="."]
-script = ExtResource("3_mk58r")
-
-[node name="Gravity" type="Node" parent="."]
-script = ExtResource("2_5npld")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_xfwl5")
 
 [node name="Sprite" type="Sprite2D" parent="."]
-scale = Vector2(0.56999993, 0.56999993)
+scale = Vector2(0.5498745, 0.54987454)
 texture = ExtResource("2_5d32t")
 hframes = 5
 vframes = 3
 
-[node name="RemoteTransform2D" type="RemoteTransform2D" parent="Sprite"]
-remote_path = NodePath("../../Matchable/MatchableSprite")
-update_rotation = false
-update_scale = false
+[node name="MatchableSprite" type="Sprite2D" parent="Sprite"]
+scale = Vector2(0.99999994, 0.99999994)
+texture = ExtResource("2_5d32t")
+hframes = 5
+vframes = 3
+frame = 1
+
+[node name="Matchable" type="Node" parent="." node_paths=PackedStringArray("matchable_sprite")]
+script = ExtResource("3_e2bb5")
+matchable_sprite = NodePath("../Sprite/MatchableSprite")
+
+[node name="Draggable" type="Node" parent="."]
+script = ExtResource("3_mk58r")
 
 [node name="ButtonClose" type="Button" parent="."]
 visible = false
@@ -100,6 +85,15 @@ offset_right = 58.0
 offset_bottom = -23.0
 scale = Vector2(0.91580707, 0.9133536)
 text = " x "
+
+[node name="ButtonMatch" type="Button" parent="."]
+visible = false
+offset_left = 32.0
+offset_top = -20.000008
+offset_right = 58.0
+offset_bottom = 10.999992
+scale = Vector2(0.91580707, 0.9133536)
+text = "m"
 
 [node name="ButtonTest" type="Button" parent="."]
 visible = false
@@ -111,7 +105,7 @@ scale = Vector2(0.91580707, 0.9133536)
 text = "t"
 
 [node name="Name" type="Label" parent="."]
-z_index = 1
+visible = false
 offset_left = -56.0
 offset_top = -21.0
 offset_right = 0.37817383
@@ -125,7 +119,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StateLabel" type="Label" parent="."]
-z_index = 1
+visible = false
 offset_left = -60.0
 offset_top = -61.0
 offset_right = -8.0
@@ -163,7 +157,6 @@ script = SubResource("GDScript_mk58r")
 
 [node name="Glow" type="Panel" parent="."]
 modulate = Color(1, 1, 1, 0)
-z_index = 1
 offset_left = -70.0
 offset_top = -70.0
 offset_right = 70.0
@@ -171,4 +164,6 @@ offset_bottom = 70.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_mk58r")
 
+[connection signal="mouse_exited" from="." to="Draggable" method="_on_mouse_exited"]
 [connection signal="pressed" from="ButtonClose" to="." method="delete"]
+[connection signal="pressed" from="ButtonMatch" to="." method="_on_button_match_pressed"]

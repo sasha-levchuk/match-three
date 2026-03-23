@@ -1,117 +1,120 @@
-# TO DO: delay the matching if the piece above hasn't landed yet
 class_name Block extends PhysicsBody2D
-var powerup: Powerup
-enum State{ FALLING, HELD, MOVING, MATCHING, RETURNING, DELETING, IDLE }
-@onready var state: State:
+static var num_blocks := 0
+enum State{FALLING, IDLE, DRAGGED, BUSY}
+var state: State:
 	set(new_state):
+		#prints(self, 'went from', State.keys()[state], State.keys()[new_state])
 		state = new_state
 		$StateLabel.text = state_str
-var state_str: String: 
-	get: return Block.State.keys()[state]
-var pos_simple: Vector2i: 
-	get: return position / size as Vector2i
+var state_str: String:
+	get(): return State.keys()[state]
 @export var sprite: Sprite2D
 @export var draggable: Draggable
 @export var matchable: Matchable
-#@export var match_type: Matchable.Type:
-	#get: return matchable.type
-	#set(v): matchable.type = v
+@export var gravity: Gravity
+@export var raycaster: Raycaster
+var powerup: Powerup
 @export var collider: CollisionShape2D
 @onready var size: float = collider.shape.size.y
 func _to_string(): return str(name)
-signal fell_down
-static var num_blocks := 0
-
+signal match_checked(result: Matchable.Result)
 
 
 func _ready():
-	num_blocks = ( num_blocks + 1 ) % 1000
+	$StateLabel.text = state_str
+	add_to_group('blocks') # used in a discoball trigger
+	num_blocks = (num_blocks + 1) % 1000
 	name += str(num_blocks).pad_zeros(3)
 	$Name.text = str(self)
 
 
-var fall_time: float
-func _physics_process(delta):
-	fall_time += delta
-	var collision := move_and_collide(Vector2.DOWN * 200 * fall_time)
-	if not collision: return
-	fall_time = 0
-	var body := collision.get_collider()
-	if body is Block and body.state == State.FALLING: return
-	set_physics_process(false)
+func _on_fall_down():
+	if matchable:
+		var result = matchable.find_matches()
+		if result.is_success:
+			apply_result(result)
 	state = State.IDLE
-	fell_down.emit()
 
 
-func delete_or_trigger():
-	if state == State.IDLE: 
-		if powerup:
-			powerup.trigger()
+func _on_swap(direction: Vector2i, neighbor: Block):
+	state = State.BUSY
+	add_collision_exception_with(neighbor)
+	await swap(direction)
+	if matchable:
+		var result := matchable.find_matches(neighbor, direction)
+		if result.is_success:
+			await get_tree().process_frame
+			match_checked.emit(result)
+			apply_result(result)
 		else:
-			delete()
+			neighbor.match_checked.connect(_on_neighbor_match_checked, CONNECT_ONE_SHOT)
+	else:
+		await get_tree().process_frame
+		match_checked.emit(Matchable.Result.new(true))
 
 
-func delete():
-	state = State.DELETING
-	var tween := create_tween()
-	tween.tween_property(self, 'modulate:a', 0, .1)
-	tween.tween_callback(func():
-		get_neighbor(Vector2i.UP, Global.collapse_requested.emit)
-		queue_free()
-	)
-
-
-func move(to: Vector2):
-	state = State.MOVING
-	var tween := create_tween()
-	tween.tween_property(sprite, 'global_position', to, 0.1)
-	tween.tween_callback(func():
-		z_index = 0
-		position = to
+func _on_neighbor_match_checked(neighbor_result: Matchable.Result):
+	if neighbor_result.is_success:
+		position = sprite.global_position
 		sprite.position = Vector2.ZERO
-	)
+		z_index = 0
+		fall()
+	else:
+		await reset_position()
+	send_collapse_impulse_up()
+
+
+func reset_position():
+	var tween = create_tween()
+	tween.tween_property(sprite, 'position', Vector2.ZERO, 0.1)
+	await tween.finished
+	z_index = 0
+	fall()
+
+
+func apply_result(result: Matchable.Result):
+	for blck: Block in result.matches:
+		blck.delete()
+	if result.is_reward:
+		var block := load("res://block.tscn").instantiate() as Block
+		block.matchable.free()
+		block.matchable = null
+		block.powerup = Powerup.new(block, result.reward)
+		block.global_position = sprite.global_position
+		add_collision_exception_with(block)
+		await get_tree().process_frame
+		add_sibling(block)
+		queue_free()
+	else:
+		delete()
+
+
+func swap(direction: Vector2i)->Signal:
+	state = State.BUSY
+	z_index = 1
+	var tween := create_tween()
+	tween.tween_property(sprite, 'position', direction*size, 0.1)
 	return tween.finished
 
 
-func make_powerup(_type: Powerup.Type):
-	if _type == Powerup.Type.NONE:
-		delete()
-		return
-	matchable.modulate.a = 0
-	powerup = Powerup.new(self, _type as Powerup.Type)
-	#sprite.frame = 1 + _type as int
-	if move_and_collide(Vector2.DOWN):
-		state = State.IDLE
-	else:
-		state = State.FALLING
-		set_physics_process(true)
+func send_collapse_impulse_up():
+	var neighbor := raycaster.get_neighbor(Vector2i.UP)
+	if neighbor and neighbor.state==State.IDLE:
+		neighbor.fall()
 
 
-func _on_button_match_pressed():
-	Matcher.match_block_fall(self)
+func fall():
+	state = State.FALLING
+	gravity.set_process(true)
+	await get_tree().create_timer(0.05).timeout
+	send_collapse_impulse_up()
 
 
-func get_neighbor(direction: Vector2i, callback := Callable()) -> Block:
-	if direction==Vector2i.UP: direction *= 10
-	var params := PhysicsRayQueryParameters2D.create(position, position+direction*size)
-	var result := get_world_2d().direct_space_state.intersect_ray(params)
-	if result.is_empty(): return null
-	add_sibling($Line.duplicate().place(position, position+direction*size))
-	if callback: callback.call(result.collider)
-	return result.collider as Block
-
-
-func get_block_at(offset: Vector2i, callback:=Callable()) -> Block:
-	var params := PhysicsPointQueryParameters2D.new()
-	params.position = position + offset * size
-	var result := get_world_2d().direct_space_state.intersect_point(params)
-	if result.is_empty(): return null
-	var node: Node = result.pop_back().collider
-	if not node is Block: return null
-	var block := node as Block
-	if block.state != Block.State.IDLE: return null
-	if block.is_queued_for_deletion(): return null
-	if not is_instance_valid(block): return null
-	add_sibling($Dot.duplicate().place(position+offset*size))
-	if callback: callback.call(block)
-	return block
+func delete():
+	state = State.BUSY
+	$Glow.modulate.a = 1.0
+	var tween := create_tween()
+	tween.tween_property(self, 'modulate:a', 0, .2)
+	await tween.finished
+	send_collapse_impulse_up()
+	queue_free()

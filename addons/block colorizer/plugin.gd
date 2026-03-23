@@ -16,6 +16,7 @@ func _exit_tree():
 
 
 func _on_button_pressed():
+	if true: return
 	for node: Node in EditorInterface.get_edited_scene_root().get_children():
 		if node is Block:
 			var block := node as Block
