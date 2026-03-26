@@ -12,7 +12,7 @@ func _ready():
 func _on_input_event(_viewport, event: InputEvent, _shape_idx):
 	if event is InputEventMouseButton:
 		if event.is_pressed() and block.state == Block.State.IDLE:
-			block.z_index += 1
+			block.z_index = 1
 			block.state = Block.State.DRAGGED
 		if event.is_released() and block.state == Block.State.DRAGGED:
 			if block.powerup:
@@ -32,7 +32,28 @@ func _on_mouse_exited():
 	direction[axis] = sign(mouse[axis]) as int
 	var neighbor := block.raycaster.get_neighbor(direction)
 	if neighbor and neighbor.draggable:
-		block._on_swap(direction, neighbor)
-		neighbor._on_swap(-direction, block)
+		var coordinator := Coordinator.new(block, neighbor)
+		block._on_swap(direction, coordinator)
+		neighbor._on_swap(-direction, coordinator)
 	else:
 		block.reset_position()
+
+
+class Coordinator:
+	var neighbors: Dictionary[Block, Block]
+	var counter := 0
+	var result := false
+	signal done
+
+	func combine_result(_result: bool) -> bool:
+		counter += 1
+		if _result: result = true
+		if counter == 2:
+			done.emit()
+		else:
+			await done
+		return result
+
+	func _init(block1: Block, block2: Block):
+		neighbors[block1] = block2
+		neighbors[block2] = block1

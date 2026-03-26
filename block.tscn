@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://b6b77187swjoj"]
+[gd_scene load_steps=13 format=3 uid="uid://b6b77187swjoj"]
 
 [ext_resource type="Script" uid="uid://b8gn2cmre4vnf" path="res://Raycaster.gd" id="1_e2bb5"]
 [ext_resource type="Script" uid="uid://bygncfy4y7ql6" path="res://block.gd" id="1_xfwl5"]
@@ -8,7 +8,26 @@
 [ext_resource type="Script" uid="uid://d3yq6lberjfy5" path="res://Draggable.gd" id="3_mk58r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xfwl5"]
-size = Vector2(98, 150)
+size = Vector2(150, 150)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mk58r"]
+bg_color = Color(1, 1, 0.7019608, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="GDScript" id="GDScript_5npld"]
+resource_name = "btn_fan_test"
+script/source = "extends Button
+@onready var block := owner as Block
+
+
+func _ready():
+	pressed.connect(func():
+		block.make_powerup(Powerup.Type.ROCKETV)
+	)
+"
 
 [sub_resource type="GDScript" id="GDScript_5d32t"]
 resource_name = "dot"
@@ -16,6 +35,7 @@ script/source = "extends Line2D
 
 
 func place(where: Vector2):
+	show()
 	var tween := create_tween()
 	tween.tween_property(self, 'modulate:a', 0, 1.5).from(1)
 	tween.tween_callback(queue_free)
@@ -40,37 +60,19 @@ func place(start: Vector2, end: Vector2):
 	return self
 "
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mk58r"]
-bg_color = Color(1, 1, 0.7019608, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-
 [node name="Block" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "draggable", "matchable", "gravity", "raycaster", "collider")]
 disable_mode = 1
 input_pickable = true
 script = ExtResource("1_xfwl5")
 sprite = NodePath("Sprite")
 draggable = NodePath("Draggable")
-matchable = NodePath("Matchable")
+matchable = NodePath("Sprite/Matchable")
 gravity = NodePath("Gravity")
 raycaster = NodePath("Raycaster")
 collider = NodePath("CollisionShape2D")
 
 [node name="Raycaster" type="Node" parent="."]
 script = ExtResource("1_e2bb5")
-
-[node name="Matchable" type="Node" parent="."]
-script = ExtResource("3_e2bb5")
-
-[node name="MatchableSprite" type="Sprite2D" parent="Matchable"]
-unique_name_in_owner = true
-scale = Vector2(0.56999993, 0.56999993)
-texture = ExtResource("2_5d32t")
-hframes = 5
-vframes = 3
-frame = 1
 
 [node name="Draggable" type="Node" parent="."]
 script = ExtResource("3_mk58r")
@@ -79,18 +81,31 @@ script = ExtResource("3_mk58r")
 script = ExtResource("2_5npld")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.5, 1)
 shape = SubResource("RectangleShape2D_xfwl5")
 
 [node name="Sprite" type="Sprite2D" parent="."]
-scale = Vector2(0.56999993, 0.56999993)
+scale = Vector2(0.5859375, 0.5859376)
 texture = ExtResource("2_5d32t")
 hframes = 5
 vframes = 3
 
-[node name="RemoteTransform2D" type="RemoteTransform2D" parent="Sprite"]
-remote_path = NodePath("../../Matchable/MatchableSprite")
-update_rotation = false
-update_scale = false
+[node name="Matchable" type="Sprite2D" parent="Sprite"]
+texture = ExtResource("2_5d32t")
+hframes = 5
+vframes = 3
+frame = 1
+script = ExtResource("3_e2bb5")
+
+[node name="Glow" type="Panel" parent="."]
+modulate = Color(1, 1, 1, 0)
+z_index = 1
+offset_left = -70.0
+offset_top = -70.0
+offset_right = 70.0
+offset_bottom = 70.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mk58r")
 
 [node name="ButtonClose" type="Button" parent="."]
 visible = false
@@ -103,14 +118,17 @@ text = " x "
 
 [node name="ButtonTest" type="Button" parent="."]
 visible = false
-offset_left = 32.0
-offset_top = 12.999996
-offset_right = 58.0
-offset_bottom = 43.999996
+offset_left = 25.0
+offset_top = 13.0
+offset_right = 63.0
+offset_bottom = 44.0
 scale = Vector2(0.91580707, 0.9133536)
-text = "t"
+text = "test
+"
+script = SubResource("GDScript_5npld")
 
 [node name="Name" type="Label" parent="."]
+visible = false
 z_index = 1
 offset_left = -56.0
 offset_top = -21.0
@@ -125,6 +143,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StateLabel" type="Label" parent="."]
+visible = false
 z_index = 1
 offset_left = -60.0
 offset_top = -61.0
@@ -137,6 +156,7 @@ text = "STATE"
 horizontal_alignment = 1
 
 [node name="Dot" type="Line2D" parent="."]
+unique_name_in_owner = true
 visible = false
 top_level = true
 position = Vector2(40, 29)
@@ -160,15 +180,5 @@ joint_mode = 2
 begin_cap_mode = 2
 end_cap_mode = 2
 script = SubResource("GDScript_mk58r")
-
-[node name="Glow" type="Panel" parent="."]
-modulate = Color(1, 1, 1, 0)
-z_index = 1
-offset_left = -70.0
-offset_top = -70.0
-offset_right = 70.0
-offset_bottom = 70.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_mk58r")
 
 [connection signal="pressed" from="ButtonClose" to="." method="delete"]

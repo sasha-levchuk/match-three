@@ -1,29 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://bp3ul08id42j3"]
+[gd_scene load_steps=5 format=3 uid="uid://bp3ul08id42j3"]
 
-[ext_resource type="PackedScene" uid="uid://b6b77187swjoj" path="res://block.tscn" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://dj1r5khkkrs4g" path="res://Spawner.gd" id="1_h2yge"]
+[ext_resource type="PackedScene" uid="uid://boogtyqx5vqok" path="res://slot.tscn" id="2_0xm2m"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_0xm2m"]
-
-[sub_resource type="GDScript" id="GDScript_0xm2m"]
-resource_name = "spawn_area"
-script/source = "extends Area2D
-@export var block_scene: PackedScene
-@export var collider: CollisionShape2D
-
-
-func _on_body_exited(body: Node2D):
-	var block := body as Block
-	if block.state == Block.State.DRAGGED: return
-	var x: float = block.position.x
-	await get_tree().process_frame
-	var new_block := load(\"res://block.tscn\").instantiate() as Block
-	new_block.matchable.type = Matchable.Type.values().pick_random() as Matchable.Type
-	get_parent().add_child(new_block)
-	new_block.position = Vector2(x, position.y)
-"
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_0xm2m"]
-size = Vector2(1151, 250.99998)
 
 [sub_resource type="GDScript" id="GDScript_h2yge"]
 resource_name = "collapse"
@@ -36,24 +16,16 @@ func _on_pressed():
 
 [node name="Board" type="Node2D"]
 
+[node name="Spawner" type="Node2D" parent="."]
+position = Vector2(96, 25)
+script = ExtResource("1_h2yge")
+
 [node name="Floor" type="StaticBody2D" parent="."]
 position = Vector2(191, 1072)
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
 shape = SubResource("WorldBoundaryShape2D_0xm2m")
-
-[node name="SpawnArea" type="Area2D" parent="." node_paths=PackedStringArray("collider")]
-z_index = -1
-position = Vector2(528, -35)
-collision_layer = 0
-script = SubResource("GDScript_0xm2m")
-block_scene = ExtResource("1_0xm2m")
-collider = NodePath("CollisionShape2D")
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="SpawnArea"]
-shape = SubResource("RectangleShape2D_0xm2m")
 
 [node name="Button" type="Button" parent="."]
 visible = false
@@ -65,26 +37,7 @@ scale = Vector2(2, 2)
 text = "test"
 script = SubResource("GDScript_h2yge")
 
-[node name="Block" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(97, 134)
+[node name="Marker2D" parent="." instance=ExtResource("2_0xm2m")]
+position = Vector2(214, 495)
 
-[node name="Block2" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(247, 134)
-
-[node name="Block3" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(397, 134)
-
-[node name="Block4" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(547, 134)
-
-[node name="Block5" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(697, 134)
-
-[node name="Block6" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(847, 134)
-
-[node name="Block7" parent="." instance=ExtResource("1_0xm2m")]
-position = Vector2(997, 134)
-
-[connection signal="body_exited" from="SpawnArea" to="SpawnArea" method="_on_body_exited"]
 [connection signal="pressed" from="Button" to="Button" method="_on_pressed"]

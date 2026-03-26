@@ -1,14 +1,13 @@
 class_name Powerup
 enum Type {DISCOBALL, TNT, ROCKETV, ROCKETH, FAN}
 var type: Type
-var frame_offset := 5
 var block: Block
 
 
 func _init(_block: Block, _type: Type):
 	type = _type
 	block = _block
-	block.sprite.frame = frame_offset + type as int
+	block.sprite.frame = 5 + type as int
 
 
 func trigger():
@@ -39,8 +38,8 @@ func trigger():
 			offsets.append_array([Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT])
 	for offset: Vector2i in offsets:
 		var del_block := block.raycaster.get_block_at_point(offset)
-		if not del_block: return
-		if not del_block.state == Block.State.IDLE: return
+		if not del_block: continue
+		if not del_block.state == Block.State.IDLE: continue
 		if del_block.powerup:
 			del_block.powerup.trigger()
 		else:

@@ -12,13 +12,13 @@ func get_block_at_point(offset: Vector2i) -> Block:
 	if not node is Block: return null
 	var neighbor := node as Block
 	if not neighbor.state == Block.State.IDLE: return null
-	#add_sibling($Dot.duplicate().place(position+offset*size))
+	#add_sibling(%Dot.duplicate().place(params.position))
 	return neighbor
 
 
 func get_neighbor(direction: Vector2i) -> Block:
 	if direction==Vector2i.UP: direction *= 10
-	var params := PhysicsRayQueryParameters2D.create(block.position, block.position+direction*block.size)
+	var params := PhysicsRayQueryParameters2D.create(block.position, block.position+direction*block.size*2)
 	var result := block.get_world_2d().direct_space_state.intersect_ray(params)
 	if result.is_empty(): return null
 	var neighbor := result.collider as Block
