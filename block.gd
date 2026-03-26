@@ -15,7 +15,7 @@ var state_str: String:
 @export var raycaster: Raycaster
 var powerup: Powerup
 @export var collider: CollisionShape2D
-@onready var size: float = collider.shape.size.y
+@onready var size: float = collider.shape.size.y * scale.y
 func _to_string(): return str(name)
 signal match_checked(result: Matchable.Result)
 
@@ -31,7 +31,7 @@ func _ready():
 var idle_timer := 0.0
 func _process(delta:float):
 	idle_timer += delta
-	if idle_timer > 2.0:
+	if idle_timer > 5.0:
 		gravity.fall()
 		idle_timer = 0.0
 
@@ -92,7 +92,9 @@ func apply_result(result: Matchable.Result):
 
 
 func make_powerup(type: Powerup.Type):
+	Game.score_incremented.emit()
 	var block := load("res://block.tscn").instantiate() as Block
+	block.scale = Spawner.instance.block_scale * Vector2.ONE
 	block.matchable.free()
 	block.matchable = null
 	block.powerup = Powerup.new(block, type)
@@ -113,6 +115,7 @@ func send_collapse_impulse_up():
 
 
 func delete():
+	Game.score_incremented.emit()
 	state = State.DELETING
 	$Glow.modulate.a = 1.0
 	var tween := create_tween()

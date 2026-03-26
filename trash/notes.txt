@@ -1,0 +1,16 @@
+bugfix: the swapped block doesn't get affected by explosions
+make tnt explode in a wave
+make rockets have travel time
+make disco ball have slower animation
+make a fan fire a homing missile fan
+make powerups combinable
+add score board
+rework the art of block background
+rework art of the fire matchable
+rework art of powerups
+add an explosion animation
+
+make the game speed up with higher score
+make the game board bigger (higher) with higher score
+add money reward
+make powerups upgradable

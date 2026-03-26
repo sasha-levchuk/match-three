@@ -25,6 +25,7 @@ func trigger():
 			block.delete()
 			return
 		Type.TNT:
+			Game.tnt_exploded.emit()
 			for x in 5:
 				for y in 5:
 					offsets.append(Vector2(x-2, y-2))

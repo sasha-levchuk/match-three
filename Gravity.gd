@@ -1,5 +1,5 @@
 class_name Gravity extends Node
-var time: float
+var time := .2
 @onready var block := owner as Block
 
 

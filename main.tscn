@@ -1,7 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://bp3ul08id42j3"]
+[gd_scene load_steps=6 format=3 uid="uid://bp3ul08id42j3"]
 
 [ext_resource type="Script" uid="uid://dj1r5khkkrs4g" path="res://Spawner.gd" id="1_h2yge"]
-[ext_resource type="PackedScene" uid="uid://boogtyqx5vqok" path="res://slot.tscn" id="2_0xm2m"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_0xm2m"]
 
@@ -14,14 +13,47 @@ func _on_pressed():
 	pass
 "
 
+[sub_resource type="GDScript" id="GDScript_0xm2m"]
+resource_name = "score"
+script/source = "extends Label
+
+
+func _ready():
+	Game.score_incremented.connect(func():
+		text = \"Score: \" + str(Game.score)
+	)
+"
+
+[sub_resource type="GDScript" id="GDScript_1bvp3"]
+resource_name = "camera"
+script/source = "extends Camera2D
+const SHAKE_POWER := 22
+const SHAKE_PERIOD := 0.05
+@onready var tween: Tween
+@onready var orig_pos := position
+
+
+func _ready():
+	Game.tnt_exploded.connect(_on_tnt_exploded)
+
+
+func _on_tnt_exploded():
+	if not tween or not tween.is_running():
+		tween = create_tween()
+	for i in 3:
+		var new_pos := position + Vector2((randf()-0.5)*SHAKE_POWER, (randf()-0.5*SHAKE_POWER))
+		tween.tween_property(self, 'position', new_pos, SHAKE_PERIOD).set_trans(Tween.TRANS_CUBIC)
+		tween.tween_property(self, 'position', orig_pos, SHAKE_PERIOD).set_trans(Tween.TRANS_CUBIC)
+"
+
 [node name="Board" type="Node2D"]
 
 [node name="Spawner" type="Node2D" parent="."]
-position = Vector2(96, 25)
+position = Vector2(77, 111)
 script = ExtResource("1_h2yge")
 
 [node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(191, 1072)
+position = Vector2(186, 1158)
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
@@ -37,7 +69,27 @@ scale = Vector2(2, 2)
 text = "test"
 script = SubResource("GDScript_h2yge")
 
-[node name="Marker2D" parent="." instance=ExtResource("2_0xm2m")]
-position = Vector2(214, 495)
+[node name="ScorePanel" type="Panel" parent="."]
+offset_left = 24.0
+offset_top = 26.0
+offset_right = 297.0
+offset_bottom = 90.0
+
+[node name="Score" type="Label" parent="ScorePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 40
+text = "Score: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = SubResource("GDScript_0xm2m")
+
+[node name="Camera" type="Camera2D" parent="."]
+position = Vector2(540, 590)
+script = SubResource("GDScript_1bvp3")
 
 [connection signal="pressed" from="Button" to="Button" method="_on_pressed"]

@@ -18,7 +18,8 @@ func get_block_at_point(offset: Vector2i) -> Block:
 
 func get_neighbor(direction: Vector2i) -> Block:
 	if direction==Vector2i.UP: direction *= 10
-	var params := PhysicsRayQueryParameters2D.create(block.position, block.position+direction*block.size*2)
+	var where_to := block.position + direction * block.size * 2
+	var params := PhysicsRayQueryParameters2D.create(block.position, where_to)
 	var result := block.get_world_2d().direct_space_state.intersect_ray(params)
 	if result.is_empty(): return null
 	var neighbor := result.collider as Block

@@ -4,7 +4,7 @@ enum Type {
 	GREEN,
 	BLUE,
 	ORANGE,
-	PURPLE,
+	#PURPLE,
 }
 var type: Type
 
