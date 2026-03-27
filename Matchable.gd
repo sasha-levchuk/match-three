@@ -1,16 +1,20 @@
 class_name Matchable extends Sprite2D
 @onready var block := owner as Block
 enum Type {
-	GREEN,
-	BLUE,
-	ORANGE,
-	#PURPLE,
+	SKULL,
+	FIRE,
+	ICICLE,
+	MAGIC,
+	PENIC,
 }
-var type: Type
+const FRAME: Dictionary[Type, int] = {
+	Type.SKULL: 1, Type.FIRE: 2, Type.ICICLE: 3, Type.MAGIC: 4, Type.PENIC: 11,
+}
+var type: Type = Type.PENIC
 
 
 func _ready():
-	frame = 1 + type as int
+	frame = FRAME[type]
 	block.name = Type.keys()[type].left(1)
 
 
@@ -26,14 +30,13 @@ class Result:
 		reward = _reward
 
 
-func v2i_to_global(v:Vector2i, direction:Vector2i) -> Vector2i:
-	return Vector2i(-direction.y, direction.x)*v.x + direction*v.y
-
-
 func find_matches(direction:=Vector2i.DOWN) -> Result:
-	var right :=   block.raycaster.gather_neighbors_toward(v2i_to_global(Vector2i.LEFT, direction), type)
-	var forward := block.raycaster.gather_neighbors_toward(v2i_to_global(Vector2i.DOWN, direction), type)
-	var left :=    block.raycaster.gather_neighbors_toward(v2i_to_global(Vector2i.RIGHT, direction), type)
+	var where := Utils.v2i_rotated(direction, Vector2i.LEFT)
+	var right :=   block.raycaster.gather_neighbors_toward(where, type)
+	where = Utils.v2i_rotated(direction, Vector2i.DOWN)
+	var forward := block.raycaster.gather_neighbors_toward(where, type)
+	where = Utils.v2i_rotated(direction, Vector2i.RIGHT)
+	var left :=    block.raycaster.gather_neighbors_toward(where, type)
 	var orthogonal := left + right
 	if forward.size()>=4 or orthogonal.size()>=4:
 		return Result.new(true, forward+orthogonal, true, Powerup.Type.DISCOBALL)
@@ -42,11 +45,11 @@ func find_matches(direction:=Vector2i.DOWN) -> Result:
 	if orthogonal.size()>=3:
 		return Result.new(true, orthogonal, true, Powerup.Type.ROCKETH if direction.x else Powerup.Type.ROCKETV)
 	if forward.size()>=1 and left.size()>=1:
-		var diag_left := block.raycaster.get_block_at_point(v2i_to_global(Vector2i(1,1), direction))
+		var diag_left := block.raycaster.get_block_at_point(Utils.v2i_rotated(direction, Vector2i(1,1)))
 		if diag_left and diag_left.matchable and diag_left.matchable.type==type:
 			return Result.new(true, orthogonal+forward+[diag_left], true)
 	if forward.size()>=1 and right.size()>=1:
-		var diag_right := block.raycaster.get_block_at_point(v2i_to_global(Vector2i(-1,1), direction))
+		var diag_right := block.raycaster.get_block_at_point(Utils.v2i_rotated(direction, Vector2i(-1,1)))
 		if diag_right and diag_right.matchable and diag_right.matchable.type==type:
 			return Result.new(true, orthogonal+forward+[diag_right], true)
 	if orthogonal.size() >= 2:
