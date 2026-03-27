@@ -1,7 +1,8 @@
+added objective blocks
+
 make tnt explode in a wave
 bugfix: the swapped block doesn't get affected by explosions
 make rockets have travel time
-add objective blocks
 make powerups combinable:
 	discoball + discoball
 	discoball + tnt

@@ -3,18 +3,15 @@ class_name Matchable extends Sprite2D
 enum Type {
 	SKULL,
 	FIRE,
-	ICICLE,
+	ICE,
 	MAGIC,
-	PENIC,
 }
-const FRAME: Dictionary[Type, int] = {
-	Type.SKULL: 1, Type.FIRE: 2, Type.ICICLE: 3, Type.MAGIC: 4, Type.PENIC: 11,
-}
-var type: Type = Type.PENIC
+const FRAME := [1, 2, 3, 4]
+var type: Type
 
 
 func _ready():
-	frame = FRAME[type]
+	frame = FRAME[type as int]
 	block.name = Type.keys()[type].left(1)
 
 

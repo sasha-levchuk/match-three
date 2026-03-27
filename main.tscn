@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://bp3ul08id42j3"]
+[gd_scene load_steps=7 format=3 uid="uid://bp3ul08id42j3"]
 
 [ext_resource type="Script" uid="uid://dj1r5khkkrs4g" path="res://Spawner.gd" id="1_h2yge"]
+[ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="2_0xm2m"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_0xm2m"]
 
@@ -20,7 +21,7 @@ script/source = "extends Label
 
 func _ready():
 	Game.score_incremented.connect(func():
-		text = \"Score: \" + str(Game.score)
+		text = str(Game.score)
 	)
 "
 
@@ -49,6 +50,7 @@ func _on_tnt_exploded():
 [node name="Board" type="Node2D"]
 
 [node name="Spawner" type="Node2D" parent="."]
+unique_name_in_owner = true
 position = Vector2(77, 111)
 script = ExtResource("1_h2yge")
 
@@ -70,20 +72,29 @@ text = "test"
 script = SubResource("GDScript_h2yge")
 
 [node name="ScorePanel" type="Panel" parent="."]
-offset_left = 24.0
-offset_top = 26.0
-offset_right = 297.0
-offset_bottom = 90.0
+offset_left = 23.0
+offset_top = 21.0
+offset_right = 222.0
+offset_bottom = 85.0
+
+[node name="Sprite2D" type="Sprite2D" parent="ScorePanel"]
+position = Vector2(67, 35)
+scale = Vector2(0.2703536, 0.2703536)
+texture = ExtResource("2_0xm2m")
+hframes = 5
+vframes = 3
+frame = 11
 
 [node name="Score" type="Label" parent="ScorePanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 58.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 40
-text = "Score: 0"
+text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 script = SubResource("GDScript_0xm2m")

@@ -8,6 +8,8 @@ func _init(_block: Block, _type: Type):
 	type = _type
 	block = _block
 	block.sprite.frame = 5 + type as int
+	block.matchable.queue_free()
+	block.matchable = null
 
 
 func trigger():

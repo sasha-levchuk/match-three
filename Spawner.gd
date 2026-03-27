@@ -50,7 +50,10 @@ static func respawn(col: int):
 
 func make_block(col: int):
 	var block := load("res://block.tscn").instantiate() as Block
-	block.matchable.type = Matchable.Type.values().pick_random() as Matchable.Type
+	if 0.08 > randf():
+		block.objective = Objective.new(block)
+	else:
+		block.matchable.type = Matchable.Type.values().pick_random() as Matchable.Type
 	block.position = Vector2(position.x + col*col_width, position.y)
 	block.scale = Vector2(block_scale, block_scale)
 	add_sibling(block)

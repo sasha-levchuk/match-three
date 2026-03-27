@@ -1,11 +1,11 @@
 [gd_scene load_steps=14 format=3 uid="uid://b6b77187swjoj"]
 
-[ext_resource type="Script" uid="uid://b8gn2cmre4vnf" path="res://Raycaster.gd" id="1_e2bb5"]
+[ext_resource type="Script" uid="uid://b8gn2cmre4vnf" path="res://Components/Raycaster.gd" id="1_e2bb5"]
 [ext_resource type="Script" uid="uid://bygncfy4y7ql6" path="res://block.gd" id="1_xfwl5"]
 [ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="2_5d32t"]
-[ext_resource type="Script" uid="uid://2yxo5hbundy3" path="res://Gravity.gd" id="2_5npld"]
-[ext_resource type="Script" uid="uid://c8n8xadwr2jvg" path="res://Matchable.gd" id="3_e2bb5"]
-[ext_resource type="Script" uid="uid://d3yq6lberjfy5" path="res://Draggable.gd" id="3_mk58r"]
+[ext_resource type="Script" uid="uid://2yxo5hbundy3" path="res://Components/Gravity.gd" id="2_5npld"]
+[ext_resource type="Script" uid="uid://c8n8xadwr2jvg" path="res://Components/Matchable.gd" id="3_e2bb5"]
+[ext_resource type="Script" uid="uid://d3yq6lberjfy5" path="res://Components/Draggable.gd" id="3_mk58r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xfwl5"]
 size = Vector2(256, 256)

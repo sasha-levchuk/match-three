@@ -4,10 +4,10 @@ var time := .2
 
 
 func fall(delay := 0.0):
-	block.state = Block.State.FALLING
-	block.collider.scale.x = 0.5
 	if delay:
 		await get_tree().create_timer(delay).timeout
+	block.state = Block.State.FALLING
+	block.collider.scale.x = 0.5
 	if block.move_and_collide(Vector2.DOWN):
 		block.state = Block.State.IDLE
 		return

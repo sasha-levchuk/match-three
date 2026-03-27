@@ -14,6 +14,7 @@ var state_str: String:
 @export var gravity: Gravity
 @export var raycaster: Raycaster
 var powerup: Powerup
+var objective: Objective
 @export var collider: CollisionShape2D
 @onready var size: float = collider.shape.size.y * scale.y
 func _to_string(): return str(name)
@@ -26,6 +27,8 @@ func _ready():
 	num_blocks = (num_blocks + 1) % 1000
 	name += str(num_blocks).pad_zeros(3)
 	$Name.text = str(self)
+	if powerup:
+		gravity.fall(0.3)
 
 
 var idle_timer := 0.0
@@ -50,8 +53,10 @@ func _on_fall_down():
 func _on_swap(direction: Vector2i, coordinator: Draggable.Coordinator):
 	state = State.BUSY
 	await move(position+direction*size, coordinator)
-	var result := Matchable.Result.new(true)
-	if powerup: powerup.trigger()
+	var result := Matchable.Result.new(false)
+	if powerup:
+		result = Matchable.Result.new(true)
+		powerup.trigger()
 	if matchable: result = matchable.find_matches(direction)
 	var neighbor_success := await coordinator.combine_result(result.is_success)
 	if result.is_success:
@@ -86,26 +91,11 @@ func apply_result(result: Matchable.Result):
 	for blck: Block in result.matches:
 		blck.delete()
 	if result.is_reward:
-		make_powerup(result.reward)
+		state = State.TRANSFORMING
+		add_collision_exception_with(Game.make_powerup(result.reward, position))
+		queue_free()
 	else:
 		delete()
-
-
-func make_powerup(type: Powerup.Type):
-	Game.score_incremented.emit()
-	var block := load("res://block.tscn").instantiate() as Block
-	block.scale = Spawner.instance.block_scale * Vector2.ONE
-	block.matchable.free()
-	block.matchable = null
-	block.powerup = Powerup.new(block, type)
-	add_collision_exception_with(block)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	block.position = position
-	add_sibling(block)
-	state = State.TRANSFORMING
-	queue_free()
-	block.gravity.fall(0.3)
 
 
 func send_collapse_impulse_up():
@@ -115,12 +105,21 @@ func send_collapse_impulse_up():
 
 
 func delete():
-	Game.score_incremented.emit()
+	var col := int(position.x/size)
+	if objective:
+		@warning_ignore("confusable_local_declaration")
+		var tween := create_tween()
+		tween.set_parallel(true)
+		z_index = 2
+		tween.tween_property(sprite, 'global_position', Vector2(170,64), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tween.tween_property(sprite, 'scale', Vector2(0.5, 0.5), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		await tween.finished
+		Game.score_incremented.emit()
 	state = State.DELETING
 	$Glow.modulate.a = 1.0
 	var tween := create_tween()
 	tween.tween_property(self, 'modulate:a', 0, .2)
 	await tween.finished
 	send_collapse_impulse_up()
-	Spawner.respawn( int(position.x/size) )
+	Spawner.respawn(col)
 	queue_free()
