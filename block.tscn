@@ -37,7 +37,7 @@ script/source = "extends Button
 
 func _ready():
 	pressed.connect(func():
-		block.make_powerup(Powerup.Type.ROCKETV)
+		block.apply_result(Matchable.Result.new(true,[],true,Powerup.Type.FAN))
 	)
 "
 
@@ -102,6 +102,7 @@ hframes = 5
 vframes = 3
 
 [node name="Hover" type="Panel" parent="Sprite"]
+visible = false
 z_index = 1
 offset_left = -128.0
 offset_top = -128.0
@@ -138,27 +139,26 @@ scale = Vector2(0.91580707, 0.9133536)
 text = " x "
 
 [node name="ButtonTest" type="Button" parent="."]
-visible = false
-offset_left = 25.0
-offset_top = 13.0
-offset_right = 63.0
-offset_bottom = 44.0
+offset_left = 8.999998
+offset_top = 9.000001
+offset_right = 111.64171
+offset_bottom = 83.4509
 scale = Vector2(0.91580707, 0.9133536)
+theme_override_font_sizes/font_size = 33
 text = "test
 "
 script = SubResource("GDScript_5npld")
 
 [node name="Name" type="Label" parent="."]
-visible = false
 z_index = 1
-offset_left = -56.0
-offset_top = -21.0
-offset_right = 0.37817383
-offset_bottom = 21.0
+offset_left = -107.0
+offset_top = -7.0
+offset_right = -28.0
+offset_bottom = 54.0
 scale = Vector2(1.4369158, 1.4369158)
 size_flags_vertical = 1
 theme_override_constants/outline_size = 9
-theme_override_font_sizes/font_size = 21
+theme_override_font_sizes/font_size = 44
 text = "B12"
 horizontal_alignment = 1
 vertical_alignment = 1

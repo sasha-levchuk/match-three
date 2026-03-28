@@ -11,7 +11,7 @@ func get_block_at_point(offset: Vector2i) -> Block:
 	var node: Node = result.pop_back().collider
 	if not node is Block: return null
 	var neighbor := node as Block
-	if not neighbor.state == Block.State.IDLE: return null
+	#if not neighbor.state == Block.State.IDLE: return null
 	#add_sibling(%Dot.duplicate().place(params.position))
 	return neighbor
 

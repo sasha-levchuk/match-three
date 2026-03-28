@@ -107,14 +107,7 @@ func send_collapse_impulse_up():
 func delete():
 	var col := int(position.x/size)
 	if objective:
-		@warning_ignore("confusable_local_declaration")
-		var tween := create_tween()
-		tween.set_parallel(true)
-		z_index = 2
-		tween.tween_property(sprite, 'global_position', Vector2(170,64), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		tween.tween_property(sprite, 'scale', Vector2(0.5, 0.5), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		await tween.finished
-		Game.score_incremented.emit()
+		await objective.collect()
 	state = State.DELETING
 	$Glow.modulate.a = 1.0
 	var tween := create_tween()

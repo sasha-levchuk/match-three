@@ -1,7 +1,8 @@
 extends Node
-signal score_incremented
-signal tnt_exploded
 var score := 0
+signal tnt_exploded
+signal score_incremented
+signal test_signal
 
 
 func _ready():

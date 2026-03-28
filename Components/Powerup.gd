@@ -42,7 +42,9 @@ func trigger():
 	for offset: Vector2i in offsets:
 		var del_block := block.raycaster.get_block_at_point(offset)
 		if not del_block: continue
-		if not del_block.state == Block.State.IDLE: continue
+		prints('del_block', del_block, offset, del_block.state_str)
+		#if not del_block.state == Block.State.IDLE: continue
+		if del_block.state != Block.State.IDLE: continue
 		if del_block.powerup:
 			del_block.powerup.trigger()
 		else:
