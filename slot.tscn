@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://dpsb37senkowq"]
+
+[ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="1_c24ra"]
+[ext_resource type="Script" uid="uid://dn8kg6xik2ytq" path="res://Slot.gd" id="2_khion"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_khion"]
+size = Vector2(216, 216)
+
+[node name="Slot" type="Area2D"]
+script = ExtResource("2_khion")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+unique_name_in_owner = true
+shape = SubResource("RectangleShape2D_khion")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0, 0, 0, 0.19607843)
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("1_c24ra")
+hframes = 5
+vframes = 3

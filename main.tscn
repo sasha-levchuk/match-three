@@ -1,9 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://bp3ul08id42j3"]
+[gd_scene load_steps=7 format=4 uid="uid://bp3ul08id42j3"]
 
-[ext_resource type="Script" uid="uid://dj1r5khkkrs4g" path="res://Spawner.gd" id="1_h2yge"]
 [ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="2_0xm2m"]
-
-[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://bnm2h05asqqyr" path="res://board.tscn" id="3_h2yge"]
 
 [sub_resource type="GDScript" id="GDScript_h2yge"]
 resource_name = "collapse"
@@ -14,15 +12,24 @@ func _on_pressed():
 	pass
 "
 
+[sub_resource type="GDScript" id="GDScript_lquwl"]
+resource_name = "resolution"
+script/source = "extends Label
+
+
+func _process(_delta):
+	text = str( get_viewport().get_visible_rect().size )
+"
+
 [sub_resource type="GDScript" id="GDScript_0xm2m"]
 resource_name = "score"
 script/source = "extends Label
 
 
-func _ready():
-	Game.score_incremented.connect(func():
-		text = str(Game.score)
-	)
+#func _ready():
+	#Game.score_incremented.connect(func():
+		#text = str(Game.score)
+	#)
 "
 
 [sub_resource type="GDScript" id="GDScript_1bvp3"]
@@ -35,7 +42,10 @@ const SHAKE_PERIOD := 0.05
 
 
 func _ready():
-	Game.tnt_exploded.connect(_on_tnt_exploded)
+	if Engine.is_embedded_in_editor():
+		zoom = Vector2.ONE * 0.3
+		Board.ZOOM = zoom
+	#Game.tnt_exploded.connect(_on_tnt_exploded)
 
 
 func _on_tnt_exploded():
@@ -47,68 +57,31 @@ func _on_tnt_exploded():
 		tween.tween_property(self, 'position', orig_pos, SHAKE_PERIOD).set_trans(Tween.TRANS_CUBIC)
 "
 
-[sub_resource type="Curve2D" id="Curve2D_0xm2m"]
-_data = {
-"points": PackedVector2Array(193.1002, 302.93695, -193.1002, -302.93695, 730, 646, 214.3589, 260.4195, -214.3589, -260.4195, 85, 56)
-}
-point_count = 2
-
-[sub_resource type="GDScript" id="GDScript_272bh"]
-resource_name = "path2d"
-script/source = "extends Path2D
-
-
-func _ready():
-	Game.test_signal.connect(func(thing: Node2D):
-		var pos := thing.global_position
-		curve.set_point_position(0, pos)
-		curve.set_point_out(0, Vector2(555,555) - pos)
-		thing.reparent($PathFollow)
-		$PathFollow.move()
-	)
-"
-
-[sub_resource type="GDScript" id="GDScript_7mycd"]
-resource_name = "path_follow"
-script/source = "extends PathFollow2D
-
-
-func move():
-	progress_ratio = 0.0
-	var tween := create_tween()
-	tween.tween_property(self, 'progress_ratio', 1.0, 0.3)
-	return tween.finished
-"
-
-[node name="Board" type="Node2D"]
-
-[node name="Spawner" type="Node2D" parent="."]
-unique_name_in_owner = true
-position = Vector2(77, 111)
-script = ExtResource("1_h2yge")
-
-[node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(186, 1158)
-metadata/_edit_group_ = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
-shape = SubResource("WorldBoundaryShape2D_0xm2m")
+[node name="Main" type="Node2D"]
 
 [node name="Button" type="Button" parent="."]
-visible = false
-offset_left = 37.0
-offset_top = 1086.0
-offset_right = 108.0
-offset_bottom = 1117.0
-scale = Vector2(2, 2)
+offset_left = 218.0
+offset_top = 2007.0
+offset_right = 289.0
+offset_bottom = 2038.0
+scale = Vector2(1.5, 1.5)
 text = "test"
 script = SubResource("GDScript_h2yge")
 
+[node name="Label" type="Label" parent="."]
+offset_left = 353.0
+offset_top = 2018.0
+offset_right = 417.0
+offset_bottom = 2041.0
+text = "123x456"
+script = SubResource("GDScript_lquwl")
+
 [node name="ScorePanel" type="Panel" parent="."]
-offset_left = 23.0
-offset_top = 21.0
-offset_right = 222.0
-offset_bottom = 85.0
+offset_left = 79.0
+offset_top = 2010.0
+offset_right = 278.0
+offset_bottom = 2074.0
+scale = Vector2(0.6, 0.6)
 
 [node name="Sprite2D" type="Sprite2D" parent="ScorePanel"]
 position = Vector2(67, 35)
@@ -133,25 +106,10 @@ vertical_alignment = 1
 script = SubResource("GDScript_0xm2m")
 
 [node name="Camera" type="Camera2D" parent="."]
-position = Vector2(540, 590)
+position = Vector2(972, 972)
 script = SubResource("GDScript_1bvp3")
 
-[node name="test_projectile" type="Sprite2D" parent="."]
-position = Vector2(730, 646)
-scale = Vector2(0.2703536, 0.2703536)
-texture = ExtResource("2_0xm2m")
-hframes = 5
-vframes = 3
-frame = 11
-
-[node name="Path2D" type="Path2D" parent="."]
-z_index = 5
-curve = SubResource("Curve2D_0xm2m")
-script = SubResource("GDScript_272bh")
-
-[node name="PathFollow" type="PathFollow2D" parent="Path2D"]
-position = Vector2(730, 646)
-rotation = -2.138282
-script = SubResource("GDScript_7mycd")
+[node name="Board" parent="." instance=ExtResource("3_h2yge")]
+tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAAQAAAAIAAAAAAAAAAQAAAAMAAAAAAAAAAQAAAAQAAAAAAAAAAQABAAAAAAAAAAAAAQACAAAAAAAAAAAAAQADAAAAAAAAAAAAAQAEAAAAAAAAAAAAAQAEAAEAAAAAAAAAAQAEAAIAAAAAAAAAAQAEAAMAAAAAAAAAAQAEAAQAAAAAAAAAAQADAAQAAAAAAAAAAQACAAQAAAAAAAAAAQABAAQAAAAAAAAAAQABAAMAAAAAAAAAAQABAAIAAAAAAAAAAQABAAEAAAAAAAAAAQACAAEAAAAAAAAAAQADAAEAAAAAAAAAAQADAAIAAAAAAAAAAQADAAMAAAAAAAAAAQACAAMAAAAAAAAAAQACAAIAAAAAAAAAAQAAAAUAAAAAAAAAAQABAAUAAAAAAAAAAQACAAUAAAAAAAAAAQADAAUAAAAAAAAAAQAEAAUAAAAAAAAAAQAEAAYAAAAAAAAAAQADAAYAAAAAAAAAAQACAAYAAAAAAAAAAQABAAYAAAAAAAAAAQAAAAYAAAAAAAAAAQAAAAcAAAAAAAAAAQABAAcAAAAAAAAAAQACAAcAAAAAAAAAAQADAAcAAAAAAAAAAQAEAAcAAAAAAAAAAQAAAAgAAAAAAAAAAQABAAgAAAAAAAAAAQACAAgAAAAAAAAAAQADAAgAAAAAAAAAAQAEAAgAAAAAAAAAAQAFAAgAAAAAAAAAAQAGAAgAAAAAAAAAAQAHAAgAAAAAAAAAAQAIAAgAAAAAAAAAAQAIAAcAAAAAAAAAAQAIAAYAAAAAAAAAAQAIAAUAAAAAAAAAAQAIAAQAAAAAAAAAAQAIAAMAAAAAAAAAAQAIAAIAAAAAAAAAAQAIAAEAAAAAAAAAAQAIAAAAAAAAAAAAAQAHAAAAAAAAAAAAAQAGAAAAAAAAAAAAAQAFAAAAAAAAAAAAAQAFAAEAAAAAAAAAAQAFAAIAAAAAAAAAAQAGAAEAAAAAAAAAAQAHAAEAAAAAAAAAAQAHAAIAAAAAAAAAAQAHAAMAAAAAAAAAAQAGAAIAAAAAAAAAAQAFAAMAAAAAAAAAAQAGAAMAAAAAAAAAAQAHAAQAAAAAAAAAAQAGAAQAAAAAAAAAAQAFAAQAAAAAAAAAAQAFAAUAAAAAAAAAAQAFAAYAAAAAAAAAAQAFAAcAAAAAAAAAAQAGAAUAAAAAAAAAAQAHAAUAAAAAAAAAAQAHAAYAAAAAAAAAAQAHAAcAAAAAAAAAAQAGAAcAAAAAAAAAAQAGAAYAAAAAAAAAAQA=")
 
 [connection signal="pressed" from="Button" to="Button" method="_on_pressed"]

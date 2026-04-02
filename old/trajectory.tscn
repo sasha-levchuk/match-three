@@ -1,0 +1,104 @@
+[gd_scene load_steps=4 format=3 uid="uid://bhhf7syn0vui"]
+
+[ext_resource type="Texture2D" uid="uid://bls5a8ln7ydal" path="res://old/Components/icon.svg" id="1_qmsch"]
+
+[sub_resource type="Curve2D" id="Curve2D_0xm2m"]
+_data = {
+"points": PackedVector2Array(193.1002, 302.93695, -193.1002, -302.93695, 608, 709, 81.49182, 302.93695, -81.49182, -302.93695, 87, 56)
+}
+point_count = 2
+
+[sub_resource type="GDScript" id="GDScript_272bh"]
+resource_name = "path2d"
+script/source = "extends Path2D
+@export var follow: PathFollow2D
+@export var rem_trans: RemoteTransform2D
+
+
+func animate_projectile(thing: Node2D):
+	thing.z_index = 99
+	var pos := thing.global_position
+	rem_trans.remote_path = thing.get_path()
+	curve.set_point_position(0, pos)
+	curve.set_point_out(0, Vector2(555,555)-pos)
+	follow.rotation = thing.rotation
+	follow.progress_ratio = 0.0
+	var tween := create_tween()
+	tween.set_parallel(true)
+	var time := 1.0
+	tween.tween_property(follow, 'rotation', TAU * ((randi()%2)*2-1), time)\\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(follow, 'progress_ratio', 1.0, time)\\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(thing, 'scale', 0.2 * Vector2.ONE, time)\\
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	tween.tween_property(thing, 'modulate:a', 0.0, time)\\
+		.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
+	tween.set_parallel(false)
+	tween.tween_callback(thing.queue_free)
+	tween.tween_callback(queue_free)
+	return tween.finished
+"
+
+[node name="Trajectory" type="Path2D" node_paths=PackedStringArray("follow", "rem_trans")]
+z_index = 5
+curve = SubResource("Curve2D_0xm2m")
+script = SubResource("GDScript_272bh")
+follow = NodePath("PathFollow")
+rem_trans = NodePath("PathFollow/RemoteTransform2D")
+
+[node name="PathFollow" type="PathFollow2D" parent="."]
+position = Vector2(608, 709)
+rotates = false
+
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="PathFollow"]
+update_scale = false
+
+[node name="0" type="PathFollow2D" parent="."]
+visible = false
+position = Vector2(608, 709)
+rotation = -2.138282
+
+[node name="Sprite2D" type="Sprite2D" parent="0"]
+scale = Vector2(0.4937548, 0.4937548)
+texture = ExtResource("1_qmsch")
+
+[node name="25" type="PathFollow2D" parent="."]
+visible = false
+position = Vector2(479.02133, 544.83203)
+rotation = -2.330077
+progress = 209.10097
+
+[node name="Sprite2D" type="Sprite2D" parent="25"]
+scale = Vector2(0.4937548, 0.4937548)
+texture = ExtResource("1_qmsch")
+
+[node name="50" type="PathFollow2D" parent="."]
+visible = false
+position = Vector2(326.76877, 401.6026)
+rotation = -2.409761
+progress = 418.20193
+
+[node name="Sprite2D" type="Sprite2D" parent="50"]
+scale = Vector2(0.4937548, 0.4937548)
+texture = ExtResource("1_qmsch")
+
+[node name="75" type="PathFollow2D" parent="."]
+visible = false
+position = Vector2(181.7209, 251.47116)
+rotation = -2.215753
+progress = 627.3029
+
+[node name="Sprite2D" type="Sprite2D" parent="75"]
+scale = Vector2(0.4937548, 0.4937548)
+texture = ExtResource("1_qmsch")
+
+[node name="100" type="PathFollow2D" parent="."]
+visible = false
+position = Vector2(86.99999, 56)
+rotation = -1.8335813
+progress = 845.896
+
+[node name="Sprite2D" type="Sprite2D" parent="100"]
+scale = Vector2(0.4937548, 0.4937548)
+texture = ExtResource("1_qmsch")

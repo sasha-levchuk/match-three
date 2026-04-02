@@ -1,0 +1,158 @@
+[gd_scene load_steps=11 format=3 uid="uid://b6b77187swjoj"]
+
+[ext_resource type="Script" uid="uid://bygncfy4y7ql6" path="res://old/block.gd" id="1_xfwl5"]
+[ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="2_5d32t"]
+[ext_resource type="Script" uid="uid://2yxo5hbundy3" path="res://old/Components/Gravity.gd" id="2_5npld"]
+[ext_resource type="Script" uid="uid://c8n8xadwr2jvg" path="res://old/Components/Matchable.gd" id="3_e2bb5"]
+[ext_resource type="Script" uid="uid://d3yq6lberjfy5" path="res://old/Components/Draggable.gd" id="3_mk58r"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xfwl5"]
+size = Vector2(107, 107)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5npld"]
+bg_color = Color(1, 1, 1, 0.12156863)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+
+[sub_resource type="GDScript" id="GDScript_cb14l"]
+resource_name = "hover"
+script/source = "extends Panel
+@onready var block := owner as Block
+
+
+func _ready():
+	block.mouse_exited.connect(hide)
+	block.mouse_entered.connect(func(): if block.state==Block.State.IDLE: show())
+	hide()
+"
+
+[sub_resource type="GDScript" id="GDScript_5npld"]
+resource_name = "btn_fan_test"
+script/source = "extends Button
+@onready var block := owner as Block
+
+
+func _ready():
+	if block.matchable:
+		pressed.connect(func():
+			block.matchable.find_matches()
+			prints('---------------------')
+			)
+	#pressed.connect(block.collect)
+		#Game.animate_projectile.bind(block.sprite))
+	#block.delete()
+	#pressed.connect(func():
+		#block.apply_result(Matchable.Result.new(true,[],true,Powerup.Type.FAN))
+	#)
+"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mk58r"]
+bg_color = Color(1, 1, 0.5019608, 0.7058824)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="Block" type="CharacterBody2D" node_paths=PackedStringArray("sprite", "draggable", "matchable", "gravity", "collider")]
+disable_mode = 1
+input_pickable = true
+safe_margin = 0.01
+script = ExtResource("1_xfwl5")
+sprite = NodePath("Sprite")
+draggable = NodePath("Draggable")
+matchable = NodePath("Sprite/Matchable")
+gravity = NodePath("Gravity")
+collider = NodePath("CollisionShape2D")
+
+[node name="Draggable" type="Node" parent="."]
+script = ExtResource("3_mk58r")
+
+[node name="Gravity" type="Node" parent="."]
+script = ExtResource("2_5npld")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.5, 1)
+shape = SubResource("RectangleShape2D_xfwl5")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_5d32t")
+hframes = 5
+vframes = 3
+
+[node name="Hover" type="Panel" parent="Sprite"]
+visible = false
+z_index = 1
+offset_left = -108.0
+offset_top = -108.0
+offset_right = 108.0
+offset_bottom = 108.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_5npld")
+script = SubResource("GDScript_cb14l")
+
+[node name="Matchable" type="Sprite2D" parent="Sprite"]
+texture = ExtResource("2_5d32t")
+hframes = 5
+vframes = 3
+frame = 1
+script = ExtResource("3_e2bb5")
+
+[node name="ButtonClose" type="Button" parent="."]
+visible = false
+offset_left = 32.0
+offset_top = -54.0
+offset_right = 58.0
+offset_bottom = -23.0
+scale = Vector2(0.91580707, 0.9133536)
+text = " x "
+
+[node name="ButtonTest" type="Button" parent="."]
+offset_left = 8.0
+offset_top = 4.0000005
+offset_right = 48.40152
+offset_bottom = 35.0
+scale = Vector2(0.91580707, 0.9133536)
+text = "test
+"
+script = SubResource("GDScript_5npld")
+
+[node name="Name" type="Label" parent="."]
+z_index = 1
+offset_left = -49.0
+offset_top = 3.0
+offset_right = -13.147972
+offset_bottom = 26.661787
+scale = Vector2(1.4369158, 1.4369158)
+size_flags_vertical = 1
+theme_override_constants/outline_size = 9
+text = "B12"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StateLabel" type="Label" parent="."]
+visible = false
+z_index = 1
+offset_left = -60.0
+offset_top = -61.0
+offset_right = -8.0
+offset_bottom = -38.0
+scale = Vector2(1.67523, 1.685782)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 15
+text = "STATE"
+horizontal_alignment = 1
+
+[node name="Glow" type="Panel" parent="."]
+visible = false
+z_index = 1
+offset_left = -54.0
+offset_top = -54.0
+offset_right = 54.0
+offset_bottom = 54.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mk58r")
+
+[connection signal="pressed" from="ButtonClose" to="." method="delete"]
