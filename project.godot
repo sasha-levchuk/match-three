@@ -10,22 +10,15 @@ config_version=5
 
 [application]
 
-config/name="match-three"
-run/main_scene="res://main.tscn"
+config/name="newer-match-three"
+run/main_scene="uid://dt8p2iojq4fnx"
 config/features=PackedStringArray("4.5", "GL Compatibility")
-
-[debug]
-
-gdscript/warnings/unused_signal=0
+config/icon="res://icon.svg"
 
 [display]
 
-window/size/viewport_width=1080
-window/size/viewport_height=1080
-
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/block colorizer/plugin.cfg")
+window/size/viewport_width=972
+window/size/viewport_height=972
 
 [rendering]
 

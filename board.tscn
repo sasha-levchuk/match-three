@@ -1,0 +1,58 @@
+[gd_scene load_steps=7 format=4 uid="uid://dt8p2iojq4fnx"]
+
+[ext_resource type="Script" uid="uid://b4poowkh6b4lp" path="res://board.gd" id="1_8l818"]
+[ext_resource type="PackedScene" uid="uid://bt67rrxixie1t" path="res://slot.tscn" id="2_psm7c"]
+
+[sub_resource type="GDScript" id="GDScript_psm7c"]
+resource_name = "btn"
+script/source = "extends Button
+
+
+func _pressed():
+	prints('###########################')
+"
+
+[sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_psm7c"]
+scenes/0/scene = ExtResource("2_psm7c")
+
+[sub_resource type="TileSet" id="TileSet_mgc1s"]
+tile_size = Vector2i(108, 108)
+sources/0 = SubResource("TileSetScenesCollectionSource_psm7c")
+
+[sub_resource type="GDScript" id="GDScript_8l818"]
+resource_name = "camera"
+script/source = "extends Camera2D
+@export var base_size := Vector2(972, 972)
+
+
+func _ready():
+	update_zoom()
+	get_viewport().size_changed.connect(update_zoom)
+
+
+func update_zoom():
+	var winsize := get_viewport_rect().size
+	var axis := winsize.min_axis_index()
+	zoom = winsize[axis] * Vector2.ONE / base_size
+	prints('update zoom', winsize, zoom)
+"
+
+[node name="Root" type="Node2D"]
+
+[node name="Button" type="Button" parent="."]
+unique_name_in_owner = true
+offset_left = 1010.0
+offset_top = 28.0
+offset_right = 1068.0
+offset_bottom = 70.0
+text = "test"
+script = SubResource("GDScript_psm7c")
+
+[node name="Board" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAABAAMAAAAAAAAAAAABAAIAAAAAAAAAAAABAAEAAAAAAAAAAAABAAAAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAEAAEAAAAAAAAAAAADAAEAAAAAAAAAAAACAAEAAAAAAAAAAAACAAIAAAAAAAAAAAADAAIAAAAAAAAAAAAEAAIAAAAAAAAAAAABAAQAAAAAAAAAAAACAAMAAAAAAAAAAAADAAMAAAAAAAAAAAAEAAMAAAAAAAAAAAAEAAQAAAAAAAAAAAADAAQAAAAAAAAAAAACAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAABAAUAAAAAAAAAAAACAAUAAAAAAAAAAAADAAUAAAAAAAAAAAAEAAUAAAAAAAAAAAAFAAUAAAAAAAAAAAAFAAQAAAAAAAAAAAAFAAMAAAAAAAAAAAAFAAIAAAAAAAAAAAAFAAEAAAAAAAAAAAAFAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAABAAYAAAAAAAAAAAACAAYAAAAAAAAAAAADAAYAAAAAAAAAAAAEAAYAAAAAAAAAAAAFAAYAAAAAAAAAAAAGAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAABAAcAAAAAAAAAAAACAAcAAAAAAAAAAAADAAcAAAAAAAAAAAAEAAcAAAAAAAAAAAAFAAcAAAAAAAAAAAAGAAcAAAAAAAAAAAAHAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAABAAgAAAAAAAAAAAACAAgAAAAAAAAAAAADAAgAAAAAAAAAAAAEAAgAAAAAAAAAAAAFAAgAAAAAAAAAAAAGAAgAAAAAAAAAAAAHAAgAAAAAAAAAAAAIAAgAAAAAAAAAAAAIAAcAAAAAAAAAAAAIAAYAAAAAAAAAAAAIAAUAAAAAAAAAAAAIAAQAAAAAAAAAAAAIAAMAAAAAAAAAAAAIAAIAAAAAAAAAAAAIAAEAAAAAAAAAAAAIAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAHAAEAAAAAAAAAAAAGAAEAAAAAAAAAAAAHAAIAAAAAAAAAAAAGAAIAAAAAAAAAAAAGAAMAAAAAAAAAAAAGAAQAAAAAAAAAAAAGAAUAAAAAAAAAAAAHAAUAAAAAAAAAAAAHAAYAAAAAAAAAAAAHAAQAAAAAAAAAAAAHAAMAAAAAAAAAAAA=")
+tile_set = SubResource("TileSet_mgc1s")
+script = ExtResource("1_8l818")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(486, 486)
+script = SubResource("GDScript_8l818")

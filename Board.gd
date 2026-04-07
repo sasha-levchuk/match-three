@@ -1,119 +1,110 @@
-class_name Board extends TileMapLayer
-static var slots: Dictionary[Vector2i, Slot]
-static var instance: Board
-static var spawned_pieces: Array[Piece]
-static var TILE_SIZE: Vector2
-static var ZOOM: Vector2
-signal swap_processed( is_success: bool )
+extends TileMapLayer
+var slots: Dictionary[Vector2i, Slot]
+var sides := [Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT]
+@onready var tilesize := tile_set.tile_size as Vector2
+var prev_pieces:Array[Piece]
 
 
 func _ready():
-	instance = self
-	TILE_SIZE = tile_set.tile_size
-	spawned_pieces.resize(10)
+	prev_pieces.resize(10)
 	await get_tree().process_frame
-	for coord: Vector2i in get_used_cells():
-		await get_tree().process_frame
-		slots[coord].refill()
+	for slot: Slot in get_children():
+		var coord := Vector2i(slot.position/tilesize)
+		slots[coord] = slot
+		slot.piece_requested.connect(_on_piece_requested.bind(coord))
+		slot.piece_landed.connect(_on_piece_landed.bind(coord))
+		slot.piece_moved.connect(_on_piece_moved.bind(coord))
+		prints('refilling slot', coord)
+	for slot: Slot in get_children():
+		slot.piece_requested.emit()
 
 
-static func get_piece_above(coord: Vector2i) -> Piece:
-	#prints('piece requested at coord', coord)
-	while coord.y > 0:
-		coord.y -= 1
-		match slots[coord].state:
-			Slot.State.READY, Slot.State.FALLING:
-				var piece := slots[coord].piece
-				slots[coord].refill()
-				return piece
-			Slot.State.SWAPPING, Slot.State.DRAGGING, Slot.State.DELETING:
-				return null
-	return spawn_piece(coord.x)
+func _on_piece_requested(coord: Vector2i):
+	var row := coord.y
+	while row:
+		row -= 1
+		var piece := slots[Vector2i(coord.x, row)].piece
+		if not piece: continue
+		if piece.state==Piece.State.IDLE or piece.state==Piece.State.FALLING:
+			piece.departed.emit()
+			slots[coord].acquire_piece(piece)
+			return
+		return
+	slots[coord].acquire_piece(spawn_piece(coord.x))
 
 
-static func spawn_piece(col: int) -> Piece:
-	var piece := load("res://piece.tscn").instantiate() as Piece
-	var prev_piece := spawned_pieces[col]
-	if prev_piece and prev_piece.global_position.y < TILE_SIZE.y/2:
-		piece.position = prev_piece.global_position + TILE_SIZE*Vector2.UP
-		piece.speed = prev_piece.speed
+func _on_piece_landed(piece: Piece, coord: Vector2i):
+	var is_success := is_match(coord, piece.type)
+	if not is_success:
+		piece.state = Piece.State.IDLE
+
+
+func is_match(coord: Vector2i, type: Piece.Type) -> bool:
+	var matches: Dictionary[Vector2i, Array]
+	for side: Vector2i in sides:
+		matches[side] = []
+		var counter := 1
+		while match_and_append(matches[side], coord+side*counter, type):
+			counter += 1
+	var result: Array
+	var horizontal := matches[Vector2i.LEFT] + matches[Vector2i.RIGHT]
+	var vertical := matches[Vector2i.UP] + matches[Vector2i.DOWN]
+	var all := horizontal + vertical
+	if horizontal.size() >= 4 or vertical.size() >= 4:
+		prints('matched 5')
+		result = all
+	elif horizontal.size() >= 2 and vertical.size() >= 2:
+		prints('matched tnt')
+		result = all
+	elif horizontal.size() >= 3:
+		prints('matched rocketv')
+		result = horizontal
+	elif vertical.size() >= 3:
+		prints('matched rocketh')
+		result = vertical
 	else:
-		piece.position = Vector2(col, -1)*TILE_SIZE + TILE_SIZE/2
-	#prints('spawning piece', piece.name, 'at', piece.position, 'col', col)
-	piece.setup_matchable()
-	instance.add_child(piece)
-	spawned_pieces[col] = piece
-	return piece
+		pass
+		#for i in 4:
+			#var direction1 := directions[i]
+			#var direction2 := directions[(i+1)%4]
+			#var diag := direction1 + direction2
+			#matches[direction] = []
+			
+	if result:
+		result.append(slots[coord].piece)
+		prints('matches', result)
+		for piece: Piece in result:
+			piece.delete()
+		return true
+	return false
 
 
-static func spawn_powerup(coord: Vector2i, type: Powerup.Type):
-	slots[coord].piece.queue_free()
-	var piece := load("res://piece.tscn").instantiate() as Piece
-	instance.add_child(piece)
-	slots[coord].piece = piece
-	piece.position = Vector2(coord)*TILE_SIZE + TILE_SIZE/2
-	piece.setup_powerup(type)
-	prints('spawn powerup', piece.powerup, 'at', coord)
+func match_and_append(arr: Array, coord: Vector2i, type: Piece.Type)->bool:
+	if is_valid(coord) and slots[coord].piece.type==type:
+		arr.append(slots[coord].piece)
+		return true
+	return false
 
 
-static func append_at(arr: Array[Slot], type: Piece.Matchable.Type, coord: Vector2i) -> bool:
+func _on_piece_moved(direction: Vector2i, coord: Vector2i):
+	if is_valid(coord+direction):
+		prints('move valid')
+	else:
+		slots[coord].piece.place_back()
+
+
+func is_valid(coord: Vector2i):
 	var slot := slots.get(coord) as Slot
-	if slot and slot.state==Slot.State.READY and \
-	slot.piece.matchable and slot.piece.matchable.type==type:
-		arr.append(slot)
-		return true
-	return false
+	return slot and slot.piece and slot.piece.state == Piece.State.IDLE
 
 
-static func match_toward(coord: Vector2i, type: Piece.Matchable.Type, direction: Vector2i) -> Array[Slot]:
-	var matches: Array[Slot]
-	while append_at(matches, type, coord+direction):
-		coord += direction
-	return matches
-
-
-static func match_at(coord: Vector2i, type: Piece.Matchable.Type):
-	var up := match_toward(coord, type, Vector2i.UP)
-	var down := match_toward(coord, type, Vector2i.DOWN)
-	var vertical := (up + down) as Array[Slot]
-	var left := match_toward(coord, type, Vector2i.LEFT)
-	var right := match_toward(coord, type, Vector2i.RIGHT)
-	var horizontal := (left + right) as Array[Slot]
-	var matches: Array[Slot]
-	if horizontal.size()>=4 or vertical.size()>=4:
-		matches = horizontal + vertical
-		spawn_powerup(coord, Powerup.Type.DISCOBALL)
-	elif horizontal.size()>=2 and vertical.size()>=2:
-		matches = horizontal + vertical
-		spawn_powerup(coord, Powerup.Type.TNT)
-	elif horizontal.size()>=3:
-		matches = horizontal
-		spawn_powerup(coord, Powerup.Type.ROCKETV)
-	elif vertical.size()>=3:
-		matches = vertical
-		spawn_powerup(coord, Powerup.Type.ROCKETH)
-	else:
-		var v := Vector2i.ONE
-		for i in 4:
-			v = Vector2i(v.y, -v.x)
-			var arr := [] as Array[Slot]
-			if append_at(arr, type, coord+v) and \
-			append_at(arr, type, coord+Vector2i(v.x, 0)) and \
-			append_at(arr, type, coord+Vector2i(0, v.y)):
-				append_at(arr, type, coord+Vector2i(v.x*2, 0))
-				append_at(arr, type, coord+Vector2i(0, v.y*2))
-				matches = arr
-				spawn_powerup(coord, Powerup.Type.FAN)
-				break
-	if not matches:
-		if horizontal.size() >= 2:
-			matches = horizontal
-			matches.append(slots[coord])
-		elif vertical.size() >= 2:
-			matches = vertical
-			matches.append(slots[coord])
-	if matches:
-		for slot: Slot in matches:
-			slot.delete()
-		return true
-	return false
+func spawn_piece(col: int) -> Piece:
+	var new_piece = load("res://piece.tscn").instantiate() as Piece
+	add_child(new_piece)
+	var pos := Vector2.RIGHT*col*tilesize + tilesize/2 + tilesize*Vector2.UP
+	var piece := prev_pieces[col]
+	if piece and is_instance_valid(piece) and piece.position.y-pos.y<tilesize.y:
+		pos = piece.position + tilesize*Vector2.UP
+	new_piece.position = pos
+	prev_pieces[col] = new_piece
+	return new_piece

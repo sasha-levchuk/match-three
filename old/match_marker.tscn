@@ -1,9 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://burduxgq4c5ss"]
-
-[ext_resource type="Texture2D" uid="uid://bls5a8ln7ydal" path="res://old/Components/icon.svg" id="1_671m0"]
-
-[node name="MatchMarker" type="Sprite2D"]
-modulate = Color(1, 0, 0, 1)
-z_index = 11
-scale = Vector2(0.3, 0.3)
-texture = ExtResource("1_671m0")

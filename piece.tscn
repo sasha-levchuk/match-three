@@ -1,64 +1,38 @@
-[gd_scene load_steps=5 format=3 uid="uid://bbno7s3k8thrh"]
+[gd_scene load_steps=4 format=3 uid="uid://dhe3yegvn753r"]
 
-[ext_resource type="Script" uid="uid://bllqicppidd7q" path="res://Piece.gd" id="1_3makh"]
-[ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="2_sk825"]
+[ext_resource type="Script" uid="uid://ctxl84f67xb5o" path="res://piece.gd" id="1_hisf2"]
+[ext_resource type="Texture2D" uid="uid://bvlax6h61c8p0" path="res://sprites.png" id="2_sk825"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_rq8yp"]
-size = Vector2(182, 204)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8l818"]
+size = Vector2(98, 98)
 
-[sub_resource type="GDScript" id="GDScript_sk825"]
-resource_name = "btn_close"
-script/source = "extends Button
+[node name="Piece" type="Area2D"]
+script = ExtResource("1_hisf2")
 
-
-func _pressed():
-	get_parent().queue_free()
-"
-
-[node name="Piece" type="Area2D" node_paths=PackedStringArray("sprite")]
-collision_layer = 2
-collision_mask = 2
-script = ExtResource("1_3makh")
-sprite = NodePath("Sprite")
+[node name="NameLabel" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 1
+offset_left = -45.0
+offset_top = -46.0
+offset_right = 14.0
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 33
+text = "A12"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("RectangleShape2D_rq8yp")
+shape = SubResource("RectangleShape2D_8l818")
 
 [node name="Sprite" type="Sprite2D" parent="."]
 unique_name_in_owner = true
+scale = Vector2(0.5, 0.5)
 texture = ExtResource("2_sk825")
 hframes = 5
 vframes = 3
-region_rect = Rect2(23, 26.5, 78, 83)
-
-[node name="Label" type="Label" parent="Sprite"]
-unique_name_in_owner = true
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -204.0
-offset_top = 42.0
-offset_right = -100.0
-offset_bottom = 103.0
-grow_horizontal = 2
-theme_override_constants/outline_size = 10
-theme_override_font_sizes/font_size = 44
-text = "B123"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="Sprite2" type="Sprite2D" parent="Sprite"]
 unique_name_in_owner = true
 texture = ExtResource("2_sk825")
 hframes = 5
 vframes = 3
-frame = 14
-
-[node name="btn_close" type="Button" parent="."]
-visible = false
-offset_left = -89.0
-offset_top = -86.0
-offset_right = 88.0
-offset_bottom = 67.0
-text = "X"
-script = SubResource("GDScript_sk825")
+frame = 2
