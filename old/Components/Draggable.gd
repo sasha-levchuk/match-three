@@ -1,3 +1,4 @@
+"
 class_name Draggable extends Node
 @onready var block := owner as Block
 
@@ -64,3 +65,4 @@ class Coordinator:
 	func _init(block1: Block, block2: Block):
 		neighbors[block1] = block2
 		neighbors[block2] = block1
+"

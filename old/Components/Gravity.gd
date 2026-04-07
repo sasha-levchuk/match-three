@@ -1,3 +1,4 @@
+"
 class_name Gravity extends Node
 var time := .2
 @onready var block := owner as Block
@@ -35,3 +36,4 @@ func _process(delta):
 			block.state = Block.State.IDLE
 	else:
 		block.state = Block.State.IDLE
+"

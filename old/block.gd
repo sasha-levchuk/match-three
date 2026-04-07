@@ -1,4 +1,5 @@
 class_name Block extends PhysicsBody2D
+"
 static var num_blocks := 0
 enum State{FALLING, IDLE, DRAGGED, BUSY, DELETING, TRANSFORMING}
 var state: State:
@@ -105,3 +106,4 @@ func delete():
 	collapse_upward()
 	Spawner.respawn(posi.x)
 	queue_free()
+"
