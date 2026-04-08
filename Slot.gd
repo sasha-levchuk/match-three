@@ -1,7 +1,7 @@
 class_name Slot extends Sprite2D
 var piece: Piece
 signal piece_departed()
-signal piece_landed(type: Piece.Type)
+signal piece_landed
 signal piece_moved(direction: Vector2i)
 signal piece_requested()
 
@@ -21,9 +21,11 @@ func acquire_piece(_piece: Piece):
 	piece.landed = piece_landed
 	piece.moved = piece_moved
 	piece.departed = piece_departed
+	if piece.state == Piece.State.BUSY:
+		return
 	piece.target = position
 	piece.state = Piece.State.FALLING
-	piece.set_process(true)
+	piece.set_physics_process(true)
 
 
 func _on_piece_departed():

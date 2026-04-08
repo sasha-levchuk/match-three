@@ -1,20 +1,28 @@
 class_name Piece extends Area2D
 static var counter: int
-const GRAVITY := 2222
-const TWEEN_TIME := .22
+const GRAVITY := 5555
+const TWEEN_TIME := .1 # seconds
+var is_matchable := true
 enum Type{
-	SKULL, 
-	FIRE, 
-	#ICE,
-	#MAGIC
+	SKULL,
+	FIRE,
+	ICE,
+	MAGIC,
 	}
+var is_powerup := false
+enum PowerupType{DISCOBALL, TNT, ROCKETV, ROCKETH, FAN}
+var powerup_type: PowerupType
 @onready var type: Type = Type.values().pick_random() as Type
-enum State{IDLE, DRAGGED, BUSY, FALLING}
+enum State{FALLING, IDLE, DRAGGED, BUSY}
 var state: State:
 	set(new_state):
 		state = new_state
-		modulate = {State.IDLE: Color.WHITE, State.DRAGGED: Color.LIGHT_GREEN,
-					State.BUSY: Color.YELLOW,State.FALLING: Color.DIM_GRAY }[state]
+		modulate = {
+			State.IDLE: Color.WHITE,
+			State.DRAGGED: Color.FUCHSIA,
+			State.BUSY: Color.ORANGE,
+			State.FALLING: Color.CADET_BLUE,
+		}[state]
 var landed: Signal
 var moved: Signal
 var departed: Signal
@@ -26,11 +34,11 @@ func _ready():
 	%NameLabel.text = str(name)
 	counter += 1
 	%Sprite2.frame = 1 + type as int
-	area_entered.connect(func(piece_below: Piece):
-		#if not is_processing() or not piece_below.is_processing(): return
-		#if piece_below.position.y > position.y:
-		speed = maxf( speed, piece_below.speed)
-			#position.y = piece_below.position.y - 108
+	area_entered.connect(func(piece: Piece):
+		if not is_physics_processing() or not piece.is_physics_processing(): 
+			return
+		if piece.position.y < position.y: # entering piece is above this one
+			speed = piece.speed
 		)
 
 
@@ -62,22 +70,41 @@ func place_back():
 
 
 func delete():
-	prints('deleting', name)
 	state = State.BUSY
 	var tween := create_tween()
 	tween.tween_property(self, 'modulate:a', 0.0, TWEEN_TIME)
 	await tween.finished
-	departed.emit()
 	queue_free()
+	departed.emit()
+
+
+func make_powerup(_powerup_type: PowerupType):
+	is_matchable = false
+	is_powerup = true
+	powerup_type = _powerup_type
+	%Sprite2.queue_free()
+	%Sprite.frame = 5 + powerup_type as int
+	state = State.IDLE
+
+
+func move(new_position: Vector2) -> Signal:
+	state = State.BUSY
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(self, 'position', new_position, TWEEN_TIME)
+	tween.tween_property(%Sprite, 'position', Vector2.ZERO, TWEEN_TIME)
+	return tween.finished
 
 
 var target: Vector2
 var speed: float
-func _process(delta:float):
+func _physics_process(delta:float):
 	speed += delta * GRAVITY
 	position = position.move_toward(target, delta * speed)
 	if position == target:
 		speed = 0
-		state = State.IDLE
-		set_process(false)
-		landed.emit(self)
+		set_physics_process(false)
+		if is_matchable:
+			landed.emit(self)
+		elif is_powerup:
+			state = State.IDLE

@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="newer-match-three"
+config/name="match-three"
 run/main_scene="uid://dt8p2iojq4fnx"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.svg"

@@ -1,16 +1,20 @@
 extends TileMapLayer
 var slots: Dictionary[Vector2i, Slot]
-var sides := [Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT]
+var sides: Array[Vector2i] = [Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT]
 @onready var tilesize := tile_set.tile_size as Vector2
 var prev_pieces:Array[Piece]
 
 
 func _ready():
+	%Button.pressed.connect(func():
+		slots[Vector2i(0,0)].piece.make_powerup(Piece.PowerupType.TNT)
+		)
 	prev_pieces.resize(10)
 	await get_tree().process_frame
 	for slot: Slot in get_children():
 		var coord := Vector2i(slot.position/tilesize)
 		slots[coord] = slot
+		slot.get_node('CoordLabel').text = str(coord.x) + ' ' + str(coord.y)
 		slot.piece_requested.connect(_on_piece_requested.bind(coord))
 		slot.piece_landed.connect(_on_piece_landed.bind(coord))
 		slot.piece_moved.connect(_on_piece_moved.bind(coord))
@@ -34,12 +38,13 @@ func _on_piece_requested(coord: Vector2i):
 
 
 func _on_piece_landed(piece: Piece, coord: Vector2i):
-	var is_success := is_match(coord, piece.type)
+	var is_success := is_match(coord)
 	if not is_success:
 		piece.state = Piece.State.IDLE
 
 
-func is_match(coord: Vector2i, type: Piece.Type) -> bool:
+func is_match(coord: Vector2i) -> bool:
+	var type := slots[coord].piece.type
 	var matches: Dictionary[Vector2i, Array]
 	for side: Vector2i in sides:
 		matches[side] = []
@@ -51,27 +56,32 @@ func is_match(coord: Vector2i, type: Piece.Type) -> bool:
 	var vertical := matches[Vector2i.UP] + matches[Vector2i.DOWN]
 	var all := horizontal + vertical
 	if horizontal.size() >= 4 or vertical.size() >= 4:
-		prints('matched 5')
 		result = all
+		slots[coord].piece.make_powerup(Piece.PowerupType.DISCOBALL)
 	elif horizontal.size() >= 2 and vertical.size() >= 2:
-		prints('matched tnt')
 		result = all
+		slots[coord].piece.make_powerup(Piece.PowerupType.TNT)
 	elif horizontal.size() >= 3:
-		prints('matched rocketv')
 		result = horizontal
+		slots[coord].piece.make_powerup(Piece.PowerupType.ROCKETV)
 	elif vertical.size() >= 3:
-		prints('matched rocketh')
 		result = vertical
+		slots[coord].piece.make_powerup(Piece.PowerupType.ROCKETH)
 	else:
-		pass
-		#for i in 4:
-			#var direction1 := directions[i]
-			#var direction2 := directions[(i+1)%4]
-			#var diag := direction1 + direction2
-			#matches[direction] = []
-			
+		for i in 4:
+			var fan_matches: Array[Piece]
+			var diag := sides[i] + sides[(i+1)%4]
+			if match_and_append(fan_matches, coord+diag, type) \
+			and matches[sides[i]] and matches[sides[(i+1)%4]]:
+				result = fan_matches + matches[sides[i]] + matches[sides[(i+1)%4]]
+				slots[coord].piece.make_powerup(Piece.PowerupType.FAN)
+				break
+		if not result:
+			if horizontal.size() >= 2:
+				result = horizontal + [slots[coord].piece]
+			elif vertical.size() >= 2:
+				result = vertical + [slots[coord].piece]
 	if result:
-		result.append(slots[coord].piece)
 		prints('matches', result)
 		for piece: Piece in result:
 			piece.delete()
@@ -80,7 +90,8 @@ func is_match(coord: Vector2i, type: Piece.Type) -> bool:
 
 
 func match_and_append(arr: Array, coord: Vector2i, type: Piece.Type)->bool:
-	if is_valid(coord) and slots[coord].piece.type==type:
+	if is_valid(coord) and slots[coord].piece.is_matchable \
+	and slots[coord].piece.type==type:
 		arr.append(slots[coord].piece)
 		return true
 	return false
@@ -88,7 +99,26 @@ func match_and_append(arr: Array, coord: Vector2i, type: Piece.Type)->bool:
 
 func _on_piece_moved(direction: Vector2i, coord: Vector2i):
 	if is_valid(coord+direction):
-		prints('move valid')
+		var piece := slots[coord].piece
+		var neighbor_slot := slots[coord+direction]
+		prints('move coord', coord, 'in direction', direction)
+		var neighbor := neighbor_slot.piece
+		neighbor.move(slots[coord].position)
+		await piece.move(neighbor_slot.position)
+		neighbor_slot.acquire_piece(piece)
+		slots[coord].acquire_piece(neighbor)
+		var is_success2 := is_match(coord+direction)
+		var is_success := is_match(coord)
+		if is_success or is_success2:
+			piece.state = Piece.State.IDLE
+			neighbor.state = Piece.State.IDLE
+		else:
+			neighbor.move(neighbor_slot.position)
+			await piece.move(slots[coord].position)
+			neighbor_slot.acquire_piece(neighbor)
+			slots[coord].acquire_piece(piece)
+			piece.state = Piece.State.IDLE
+			neighbor.state = Piece.State.IDLE
 	else:
 		slots[coord].piece.place_back()
 
@@ -100,11 +130,11 @@ func is_valid(coord: Vector2i):
 
 func spawn_piece(col: int) -> Piece:
 	var new_piece = load("res://piece.tscn").instantiate() as Piece
-	add_child(new_piece)
 	var pos := Vector2.RIGHT*col*tilesize + tilesize/2 + tilesize*Vector2.UP
 	var piece := prev_pieces[col]
 	if piece and is_instance_valid(piece) and piece.position.y-pos.y<tilesize.y:
 		pos = piece.position + tilesize*Vector2.UP
 	new_piece.position = pos
+	add_child(new_piece)
 	prev_pieces[col] = new_piece
 	return new_piece
