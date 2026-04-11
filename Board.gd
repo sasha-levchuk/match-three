@@ -1,3 +1,6 @@
+# make pieces stick to the mouse until left button is released
+# make every type of piece combine to result in a different powerup
+# make propellers fly in a trajectory
 extends TileMapLayer
 var slots: Dictionary[Vector2i, Slot]
 var sides: Array[Vector2i] = [Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT]
@@ -18,6 +21,7 @@ func _ready():
 		slot.piece_requested.connect(_on_piece_requested.bind(coord))
 		slot.piece_landed.connect(_on_piece_landed.bind(coord))
 		slot.piece_moved.connect(_on_piece_moved.bind(coord))
+		slot.piece_triggered.connect(trigger_powerup.bind(coord))
 		prints('refilling slot', coord)
 	for slot: Slot in get_children():
 		slot.piece_requested.emit()
@@ -31,10 +35,12 @@ func _on_piece_requested(coord: Vector2i):
 		if not piece: continue
 		if piece.state==Piece.State.IDLE or piece.state==Piece.State.FALLING:
 			piece.departed.emit()
-			slots[coord].acquire_piece(piece)
+			slots[coord].connect_signals(piece)
+			piece.state = Piece.State.FALLING
+			piece.set_physics_process(true)
 			return
 		return
-	slots[coord].acquire_piece(spawn_piece(coord.x))
+	slots[coord].connect_signals(spawn_piece(coord.x))
 
 
 func _on_piece_landed(piece: Piece, coord: Vector2i):
@@ -67,8 +73,8 @@ func is_match(coord: Vector2i) -> bool:
 	elif vertical.size() >= 3:
 		result = vertical
 		slots[coord].piece.make_powerup(Piece.PowerupType.ROCKETH)
-	else:
-		for i in 4:
+	else: # fan or just three
+		for i in 4: # fan
 			var fan_matches: Array[Piece]
 			var diag := sides[i] + sides[(i+1)%4]
 			if match_and_append(fan_matches, coord+diag, type) \
@@ -76,13 +82,12 @@ func is_match(coord: Vector2i) -> bool:
 				result = fan_matches + matches[sides[i]] + matches[sides[(i+1)%4]]
 				slots[coord].piece.make_powerup(Piece.PowerupType.FAN)
 				break
-		if not result:
+		if not result: # no fan detected, try 3 in a row
 			if horizontal.size() >= 2:
 				result = horizontal + [slots[coord].piece]
 			elif vertical.size() >= 2:
 				result = vertical + [slots[coord].piece]
 	if result:
-		prints('matches', result)
 		for piece: Piece in result:
 			piece.delete()
 		return true
@@ -98,29 +103,25 @@ func match_and_append(arr: Array, coord: Vector2i, type: Piece.Type)->bool:
 
 
 func _on_piece_moved(direction: Vector2i, coord: Vector2i):
-	if is_valid(coord+direction):
-		var piece := slots[coord].piece
-		var neighbor_slot := slots[coord+direction]
-		prints('move coord', coord, 'in direction', direction)
-		var neighbor := neighbor_slot.piece
-		neighbor.move(slots[coord].position)
-		await piece.move(neighbor_slot.position)
-		neighbor_slot.acquire_piece(piece)
-		slots[coord].acquire_piece(neighbor)
-		var is_success2 := is_match(coord+direction)
-		var is_success := is_match(coord)
-		if is_success or is_success2:
-			piece.state = Piece.State.IDLE
-			neighbor.state = Piece.State.IDLE
-		else:
-			neighbor.move(neighbor_slot.position)
-			await piece.move(slots[coord].position)
-			neighbor_slot.acquire_piece(neighbor)
-			slots[coord].acquire_piece(piece)
-			piece.state = Piece.State.IDLE
-			neighbor.state = Piece.State.IDLE
+	var slot := slots[coord]
+	if not is_valid(coord+direction): return
+	var slot2 := slots[coord+direction]
+	slot.acquire_move(slot2.piece)
+	await slot2.acquire_move(slot.piece)
+	if slot.piece.is_powerup and slot2.piece.is_powerup:
+		powerup_combine([slot.piece.powerup_type, slot2.piece.powerup_type], coord+direction)
+	elif slot.piece.is_powerup:
+		is_match(coord+direction)
+		slot.piece.explode()
+	elif slot2.piece.is_powerup:
+		is_match(coord)
+		slot2.piece.explode()
 	else:
-		slots[coord].piece.place_back()
+		var is_success := is_match(coord) if slot.piece.is_matchable else true
+		var is_success2 := is_match(coord+direction) if slot2.piece.is_matchable else true
+		if not is_success and not is_success2:
+			slot.acquire_move(slot2.piece)
+			slot2.acquire_move(slot.piece)
 
 
 func is_valid(coord: Vector2i):
@@ -138,3 +139,65 @@ func spawn_piece(col: int) -> Piece:
 	add_child(new_piece)
 	prev_pieces[col] = new_piece
 	return new_piece
+
+
+func trigger_powerup(powerup_type: Piece.PowerupType, coord: Vector2i):
+	#var offsets: Array[Vector2]
+	match powerup_type:
+		Piece.PowerupType.DISCOBALL:
+			var type := Piece.Type.values().pick_random() as Piece.Type
+			get_tree().call_group('matchables', 'delete_type', type)
+		Piece.PowerupType.TNT:
+			delete_square(coord, 5, 5)
+		Piece.PowerupType.ROCKETV:
+			delete_square(coord, 1, 22)
+		Piece.PowerupType.ROCKETH:
+			delete_square(coord, 22, 1)
+		Piece.PowerupType.FAN:
+			delete_square(coord, 3, 1)
+			delete_square(coord, 1, 3)
+
+
+func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
+	types.sort()
+	prints('combo', types, 'at', coord)
+	match types:
+		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.DISCOBALL]:
+			var type := Piece.Type.values().pick_random() as Piece.Type
+			var type2 := Piece.Type.values().pick_random() as Piece.Type
+			while type == type2:
+				type2 = Piece.Type.values().pick_random() as Piece.Type
+			get_tree().call_group('matchables', 'delete_type', type)
+			get_tree().call_group('matchables', 'delete_type', type2)
+		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.TNT]:
+			pass
+		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.ROCKETV],\
+		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.ROCKETH]:
+			pass
+		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.FAN]:
+			pass
+		[Piece.PowerupType.TNT, Piece.PowerupType.TNT]:
+			delete_square(coord, 6, 6)
+		[Piece.PowerupType.TNT, Piece.PowerupType.ROCKETV],\
+		[Piece.PowerupType.TNT, Piece.PowerupType.ROCKETH]:
+			delete_square(coord, 3, 22)
+			delete_square(coord, 22, 3)
+		[Piece.PowerupType.TNT, Piece.PowerupType.FAN]:
+			prints('fan tnt')
+		[Piece.PowerupType.ROCKETV, Piece.PowerupType.ROCKETV],\
+		[Piece.PowerupType.ROCKETH, Piece.PowerupType.ROCKETH],\
+		[Piece.PowerupType.ROCKETV, Piece.PowerupType.ROCKETH]:
+			delete_square(coord, 1, 22)
+			delete_square(coord, 22, 1)
+		[Piece.PowerupType.ROCKETV, Piece.PowerupType.FAN],\
+		[Piece.PowerupType.ROCKETH, Piece.PowerupType.FAN]:
+			pass
+		[Piece.PowerupType.FAN, Piece.PowerupType.FAN]:
+			pass
+
+
+func delete_square(coord: Vector2i, cols:=1, rows:=1):
+	for col: int in range(-cols/2, cols/2+1):
+		for row: int in range(-rows/2, rows/2+1):
+			var del_coord := coord + Vector2i(col, row)
+			if is_valid(del_coord): slots[del_coord].piece.explode()

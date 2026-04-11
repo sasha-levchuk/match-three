@@ -12,7 +12,7 @@ hframes = 5
 vframes = 3
 script = ExtResource("2_hiqfk")
 
-[node name="Button" type="Button" parent="."]
+[node name="ButtonClose" type="Button" parent="."]
 unique_name_in_owner = true
 visible = false
 z_index = 3
@@ -21,6 +21,16 @@ offset_top = 27.999992
 offset_right = -22.400154
 offset_bottom = 91.96654
 text = "X"
+
+[node name="ButtonTest" type="Button" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 3
+offset_left = 16.0
+offset_top = 26.000002
+offset_right = 85.599846
+offset_bottom = 89.966545
+text = "T"
 
 [node name="CoordLabel" type="Label" parent="."]
 unique_name_in_owner = true
