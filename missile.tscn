@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://6y531ot2esjb"]
+
+[ext_resource type="Texture2D" uid="uid://bvlax6h61c8p0" path="res://sprites.png" id="1_cdnlh"]
+[ext_resource type="Script" uid="uid://doxh4mud3x4vq" path="res://missile.gd" id="2_0uoyr"]
+
+[node name="Missile" type="Sprite2D"]
+z_index = 10
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("1_cdnlh")
+hframes = 5
+vframes = 3
+frame = 9
+script = ExtResource("2_0uoyr")

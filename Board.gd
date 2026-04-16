@@ -1,17 +1,17 @@
 # make pieces stick to the mouse until left button is released
 # make every type of piece combine to result in a different powerup
 # make propellers fly in a trajectory
+# bug: a spawned powerup gets triggered but stays IDLE and can fall under gravity
+# black hole fan
 extends TileMapLayer
 var slots: Dictionary[Vector2i, Slot]
 var sides: Array[Vector2i] = [Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT]
 @onready var tilesize := tile_set.tile_size as Vector2
 var prev_pieces:Array[Piece]
+@export var crystal: Node2D
 
 
 func _ready():
-	%Button.pressed.connect(func():
-		slots[Vector2i(0,0)].piece.make_powerup(Piece.PowerupType.TNT)
-		)
 	prev_pieces.resize(10)
 	await get_tree().process_frame
 	for slot: Slot in get_children():
@@ -21,7 +21,7 @@ func _ready():
 		slot.piece_requested.connect(_on_piece_requested.bind(coord))
 		slot.piece_landed.connect(_on_piece_landed.bind(coord))
 		slot.piece_moved.connect(_on_piece_moved.bind(coord))
-		slot.piece_triggered.connect(trigger_powerup.bind(coord))
+		slot.piece_triggered.connect(_on_piece_triggered.bind(coord))
 		prints('refilling slot', coord)
 	for slot: Slot in get_children():
 		slot.piece_requested.emit()
@@ -80,7 +80,7 @@ func is_match(coord: Vector2i) -> bool:
 			if match_and_append(fan_matches, coord+diag, type) \
 			and matches[sides[i]] and matches[sides[(i+1)%4]]:
 				result = fan_matches + matches[sides[i]] + matches[sides[(i+1)%4]]
-				slots[coord].piece.make_powerup(Piece.PowerupType.FAN)
+				slots[coord].piece.make_powerup(Piece.PowerupType.POOFY)
 				break
 		if not result: # no fan detected, try 3 in a row
 			if horizontal.size() >= 2:
@@ -141,7 +141,7 @@ func spawn_piece(col: int) -> Piece:
 	return new_piece
 
 
-func trigger_powerup(powerup_type: Piece.PowerupType, coord: Vector2i):
+func _on_piece_triggered(powerup_type: Piece.PowerupType, coord: Vector2i):
 	#var offsets: Array[Vector2]
 	match powerup_type:
 		Piece.PowerupType.DISCOBALL:
@@ -153,7 +153,18 @@ func trigger_powerup(powerup_type: Piece.PowerupType, coord: Vector2i):
 			delete_square(coord, 1, 22)
 		Piece.PowerupType.ROCKETH:
 			delete_square(coord, 22, 1)
-		Piece.PowerupType.FAN:
+		Piece.PowerupType.POOFY:
+			var missile := load("res://missile.tscn").instantiate() as Missile
+			missile.position = slots[coord].position
+			add_child(missile)
+			missile.target_requested.connect(func():
+				for i in 30:
+					var slot := slots.values().pick_random() as Slot
+					if slot.is_valid_target():
+						missile.target = slot
+						missile.target_pos = slot.position
+						break
+				)
 			delete_square(coord, 3, 1)
 			delete_square(coord, 1, 3)
 
@@ -174,7 +185,7 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.ROCKETV],\
 		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.ROCKETH]:
 			pass
-		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.FAN]:
+		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.POOFY]:
 			pass
 		[Piece.PowerupType.TNT, Piece.PowerupType.TNT]:
 			delete_square(coord, 6, 6)
@@ -182,17 +193,17 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 		[Piece.PowerupType.TNT, Piece.PowerupType.ROCKETH]:
 			delete_square(coord, 3, 22)
 			delete_square(coord, 22, 3)
-		[Piece.PowerupType.TNT, Piece.PowerupType.FAN]:
+		[Piece.PowerupType.TNT, Piece.PowerupType.POOFY]:
 			prints('fan tnt')
 		[Piece.PowerupType.ROCKETV, Piece.PowerupType.ROCKETV],\
 		[Piece.PowerupType.ROCKETH, Piece.PowerupType.ROCKETH],\
 		[Piece.PowerupType.ROCKETV, Piece.PowerupType.ROCKETH]:
 			delete_square(coord, 1, 22)
 			delete_square(coord, 22, 1)
-		[Piece.PowerupType.ROCKETV, Piece.PowerupType.FAN],\
-		[Piece.PowerupType.ROCKETH, Piece.PowerupType.FAN]:
+		[Piece.PowerupType.ROCKETV, Piece.PowerupType.POOFY],\
+		[Piece.PowerupType.ROCKETH, Piece.PowerupType.POOFY]:
 			pass
-		[Piece.PowerupType.FAN, Piece.PowerupType.FAN]:
+		[Piece.PowerupType.POOFY, Piece.PowerupType.POOFY]:
 			pass
 
 

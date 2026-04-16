@@ -37,3 +37,7 @@ func _on_piece_departed():
 	while not piece:
 		piece_requested.emit()
 		await get_tree().create_timer(0.1).timeout
+
+
+func is_valid_target():
+	return piece and piece.state == Piece.State.IDLE and piece.is_matchable

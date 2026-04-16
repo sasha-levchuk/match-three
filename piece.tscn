@@ -44,8 +44,10 @@ frame = 2
 unique_name_in_owner = true
 visible = false
 z_index = 2
-offset_right = 123.0
-offset_bottom = 119.0
+offset_left = 35.0
+offset_top = 29.0
+offset_right = 158.0
+offset_bottom = 106.0
 
 [node name="MarginContainer" type="MarginContainer" parent="Menu"]
 layout_mode = 1
@@ -63,17 +65,15 @@ theme_override_constants/margin_bottom = 5
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="Button" type="Button" parent="Menu/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "button1"
-
-[node name="Button2" type="Button" parent="Menu/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "button2
-"
-
-[node name="Cancel" type="Button" parent="Menu/MarginContainer/VBoxContainer"]
+[node name="BtnPowerup" type="Button" parent="Menu/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Cancel
-"
+text = "Poofy"
+
+[node name="BtnDelete" type="Button" parent="Menu/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Delete"
+
+[connection signal="pressed" from="Menu/MarginContainer/VBoxContainer/BtnPowerup" to="Menu" method="hide"]
+[connection signal="pressed" from="Menu/MarginContainer/VBoxContainer/BtnDelete" to="Menu" method="hide"]

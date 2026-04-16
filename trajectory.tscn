@@ -1,10 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://bhhf7syn0vui"]
-
-[ext_resource type="Texture2D" uid="uid://dpvd42infxc5j" path="res://sprites.png" id="1_qmsch"]
+[gd_scene load_steps=3 format=3 uid="uid://bhhf7syn0vui"]
 
 [sub_resource type="Curve2D" id="Curve2D_0xm2m"]
+resource_local_to_scene = true
 _data = {
-"points": PackedVector2Array(193.1002, 302.93695, -193.1002, -302.93695, 608, 709, 81.49182, 302.93695, -81.49182, -302.93695, 87, 56)
+"points": PackedVector2Array(26.625729, 387.32376, -26.625729, -387.32376, 666, 666, 28.187202, 453.3017, -28.187202, -453.3017, 100, 100)
 }
 point_count = 2
 
@@ -13,92 +12,67 @@ resource_name = "path2d"
 script/source = "extends Path2D
 @export var follow: PathFollow2D
 @export var rem_trans: RemoteTransform2D
+@export var line: Line2D
 
 
-func animate_projectile(thing: Node2D):
+func _input(event: InputEvent):
+	if event is InputEventMouseButton:
+		if event.is_pressed():
+			prints(event, 'pressed')
+		else:
+			prints(event, 'released')
+
+
+func animate(thing: Node2D, target_node: Node2D):
 	thing.z_index = 99
-	var pos := thing.global_position
-	rem_trans.remote_path = thing.get_path()
-	curve.set_point_position(0, pos)
-	curve.set_point_out(0, Vector2(555,555)-pos)
+	var start := thing.global_position
+	var end := target_node.global_position
+	curve.set_point_position(0, start)
+	curve.set_point_position(1, end)
+	var middle := (end-start)/2
+	curve.set_point_out(0, middle.rotated((randf()-.5)*TAU))
+	curve.set_point_in(1, -middle)
+	line.points = curve.get_baked_points()
 	follow.rotation = thing.rotation
-	follow.progress_ratio = 0.0
-	var tween := create_tween()
-	tween.set_parallel(true)
+	rem_trans.remote_path = thing.get_path()
 	var time := 1.0
-	tween.tween_property(follow, 'rotation', TAU * ((randi()%2)*2-1), time)\\
+	var tween := create_tween()
+	tween.tween_property(thing, 'scale', Vector2.ONE * 1.2, time/3)
+	tween.tween_property(thing, 'scale', Vector2.ONE, time/3*2)\\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tween = create_tween().set_parallel(true)
+	var rot := TAU * randf_range(1, 2) * signf(randf()-.5)
+	tween.tween_property(follow, 'rotation', rot , time)\\
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tween.tween_property(follow, 'progress_ratio', 1.0, time)\\
-		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(thing, 'scale', 0.2 * Vector2.ONE, time)\\
-		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-	tween.tween_property(thing, 'modulate:a', 0.0, time)\\
-		.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	#tween.tween_property(thing, 'scale', 0.5 * Vector2.ONE, time)\\
+		#.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	#tween.tween_property(thing, 'modulate:a', 0.5, time)\\
+		#.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
 	tween.set_parallel(false)
 	tween.tween_callback(thing.queue_free)
 	tween.tween_callback(queue_free)
 	return tween.finished
 "
 
-[node name="Trajectory" type="Path2D" node_paths=PackedStringArray("follow", "rem_trans")]
+[node name="Trajectory" type="Path2D" node_paths=PackedStringArray("follow", "rem_trans", "line")]
 z_index = 5
 curve = SubResource("Curve2D_0xm2m")
 script = SubResource("GDScript_272bh")
 follow = NodePath("PathFollow")
 rem_trans = NodePath("PathFollow/RemoteTransform2D")
+line = NodePath("Line2D")
+
+[node name="Line2D" type="Line2D" parent="."]
+points = PackedVector2Array(86, 60, 343, 369, 606, 706)
+width = 5.0
+default_color = Color(1, 1, 1, 0.25490198)
 
 [node name="PathFollow" type="PathFollow2D" parent="."]
-position = Vector2(608, 709)
+position = Vector2(666, 666)
 rotates = false
+loop = false
 
 [node name="RemoteTransform2D" type="RemoteTransform2D" parent="PathFollow"]
 update_scale = false
-
-[node name="0" type="PathFollow2D" parent="."]
-visible = false
-position = Vector2(608, 709)
-rotation = -2.138282
-
-[node name="Sprite2D" type="Sprite2D" parent="0"]
-scale = Vector2(0.4937548, 0.4937548)
-texture = ExtResource("1_qmsch")
-
-[node name="25" type="PathFollow2D" parent="."]
-visible = false
-position = Vector2(479.02133, 544.83203)
-rotation = -2.330077
-progress = 209.10097
-
-[node name="Sprite2D" type="Sprite2D" parent="25"]
-scale = Vector2(0.4937548, 0.4937548)
-texture = ExtResource("1_qmsch")
-
-[node name="50" type="PathFollow2D" parent="."]
-visible = false
-position = Vector2(326.76877, 401.6026)
-rotation = -2.409761
-progress = 418.20193
-
-[node name="Sprite2D" type="Sprite2D" parent="50"]
-scale = Vector2(0.4937548, 0.4937548)
-texture = ExtResource("1_qmsch")
-
-[node name="75" type="PathFollow2D" parent="."]
-visible = false
-position = Vector2(181.7209, 251.47116)
-rotation = -2.215753
-progress = 627.3029
-
-[node name="Sprite2D" type="Sprite2D" parent="75"]
-scale = Vector2(0.4937548, 0.4937548)
-texture = ExtResource("1_qmsch")
-
-[node name="100" type="PathFollow2D" parent="."]
-visible = false
-position = Vector2(86.99999, 56)
-rotation = -1.8335813
-progress = 845.896
-
-[node name="Sprite2D" type="Sprite2D" parent="100"]
-scale = Vector2(0.4937548, 0.4937548)
-texture = ExtResource("1_qmsch")

@@ -6,30 +6,22 @@ var is_matchable := true
 var is_powerup := false
 enum Type{
 	SKULL,
-	FIRE,
 	ICE,
-	MAGIC,
+	FIRE,
+	#MAGIC,
 	}
 @onready var type: Type = Type.values().pick_random() as Type
 enum PowerupType{
-	DISCOBALL,
-	TNT,
-	ROCKETV,
-	ROCKETH,
-	FAN,
+	DISCOBALL, 
+	TNT, 
+	ROCKETV, 
+	ROCKETH, 
+	POOFY,
 	}
 var powerup_type: PowerupType
 enum State{FALLING, IDLE, DRAGGED, BUSY}
-var state: State:
-	set(new_state):
-		state = new_state
-		if true: return
-		modulate = {
-			State.IDLE: Color.WHITE,
-			State.DRAGGED: Color.FUCHSIA,
-			State.BUSY: Color.ORANGE,
-			State.FALLING: Color.CADET_BLUE,
-		}[state]
+var state: State
+#modulate = {State.IDLE: Color.WHITE,State.DRAGGED: Color.FUCHSIA,State.BUSY: Color.ORANGE,State.FALLING: Color.CADET_BLUE}[state]
 var landed: Signal
 var moved: Signal
 var departed: Signal
@@ -43,11 +35,11 @@ func _ready():
 	name = Type.keys()[type].left(1) + str(counter).pad_zeros(2)
 	%NameLabel.text = str(name)
 	%Sprite2.frame = 1 + type as int
-	%Cancel.pressed.connect(%Menu.hide)
+	%BtnPowerup.pressed.connect(make_powerup.bind(PowerupType.POOFY))
+	%BtnDelete.pressed.connect(delete)
 	area_entered.connect(func(piece: Piece):
-		if is_physics_processing() and piece.is_physics_processing(): 
-			if piece.position.y < position.y:
-				speed = piece.speed
+		if state==State.FALLING and piece.position.y < position.y:
+			speed = piece.speed
 		)
 
 
@@ -55,7 +47,7 @@ func _input_event(_viewport, event: InputEvent, _shape_idx):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			%Menu.show()
-		if event.is_pressed() and state==State.IDLE:
+		elif event.is_pressed() and state==State.IDLE:
 			state = State.DRAGGED
 			z_index = 1
 			%Sprite.scale = Vector2.ONE * 0.53
@@ -135,7 +127,7 @@ func explode():
 	state = State.BUSY
 	if is_powerup:
 		triggered.emit(powerup_type)
-	else: 
+	else:
 		%Sprite2.queue_free()
 	%Sprite.frame = 10
 	await get_tree().create_timer(0.2).timeout
