@@ -7,7 +7,7 @@
 z_index = 10
 scale = Vector2(0.6, 0.6)
 texture = ExtResource("1_cdnlh")
-hframes = 5
+hframes = 6
 vframes = 3
-frame = 9
+frame = 10
 script = ExtResource("2_0uoyr")

@@ -1,8 +1,3 @@
-# make pieces stick to the mouse until left button is released
-# make every type of piece combine to result in a different powerup
-# make propellers fly in a trajectory
-# bug: a spawned powerup gets triggered but stays IDLE and can fall under gravity
-# black hole fan
 extends TileMapLayer
 var slots: Dictionary[Vector2i, Slot]
 var sides: Array[Vector2i] = [Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT]
@@ -106,11 +101,15 @@ func _on_piece_moved(direction: Vector2i, coord: Vector2i):
 	var slot := slots[coord]
 	if not is_valid(coord+direction): return
 	var slot2 := slots[coord+direction]
+	if slot.piece.is_powerup and slot2.piece.is_powerup:
+		slot2.piece.delete()
+		await slot.piece.move(slot2.position)
+		slot.piece.delete()
+		powerup_combine([slot.piece.powerup_type, slot2.piece.powerup_type], coord+direction)
+		return
 	slot.acquire_move(slot2.piece)
 	await slot2.acquire_move(slot.piece)
-	if slot.piece.is_powerup and slot2.piece.is_powerup:
-		powerup_combine([slot.piece.powerup_type, slot2.piece.powerup_type], coord+direction)
-	elif slot.piece.is_powerup:
+	if slot.piece.is_powerup:
 		is_match(coord+direction)
 		slot.piece.explode()
 	elif slot2.piece.is_powerup:
@@ -154,17 +153,8 @@ func _on_piece_triggered(powerup_type: Piece.PowerupType, coord: Vector2i):
 		Piece.PowerupType.ROCKETH:
 			delete_square(coord, 22, 1)
 		Piece.PowerupType.POOFY:
-			var missile := load("res://missile.tscn").instantiate() as Missile
-			missile.position = slots[coord].position
-			add_child(missile)
-			missile.target_requested.connect(func():
-				for i in 30:
-					var slot := slots.values().pick_random() as Slot
-					if slot.is_valid_target():
-						missile.target = slot
-						missile.target_pos = slot.position
-						break
-				)
+			prints('single poofy')
+			make_poofy_missile(coord)
 			delete_square(coord, 3, 1)
 			delete_square(coord, 1, 3)
 
@@ -186,7 +176,11 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.ROCKETH]:
 			pass
 		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.POOFY]:
-			pass
+			var type := get_most_used_type()
+			for c: Vector2i in slots:
+				if not slots[c].is_valid_target(): continue
+				if not slots[c].piece.type == type: continue
+				slots[c].piece.glow_delete().tween_callback(make_poofy_missile.bind(c))
 		[Piece.PowerupType.TNT, Piece.PowerupType.TNT]:
 			delete_square(coord, 6, 6)
 		[Piece.PowerupType.TNT, Piece.PowerupType.ROCKETV],\
@@ -204,7 +198,12 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 		[Piece.PowerupType.ROCKETH, Piece.PowerupType.POOFY]:
 			pass
 		[Piece.PowerupType.POOFY, Piece.PowerupType.POOFY]:
-			pass
+			prints('double poofy')
+			make_poofy_missile(coord)
+			make_poofy_missile(coord)
+			make_poofy_missile(coord)
+			delete_square(coord, 3, 1)
+			delete_square(coord, 1, 3)
 
 
 func delete_square(coord: Vector2i, cols:=1, rows:=1):
@@ -212,3 +211,34 @@ func delete_square(coord: Vector2i, cols:=1, rows:=1):
 		for row: int in range(-rows/2, rows/2+1):
 			var del_coord := coord + Vector2i(col, row)
 			if is_valid(del_coord): slots[del_coord].piece.explode()
+
+
+func make_poofy_missile(coord: Vector2i):
+	var missile := load("res://missile.tscn").instantiate() as Missile
+	missile.position = slots[coord].position
+	add_child(missile)
+	missile.target_requested.connect(func():
+		for i in 30:
+			var slot := slots.values().pick_random() as Slot
+			if slot.is_valid_target():
+				missile.target = slot
+				missile.target_pos = slot.position
+				break
+		)
+
+
+func get_most_used_type() -> Piece.Type:
+	var type_numbers: Dictionary[Piece.Type, int]
+	for slot: Slot in slots.values():
+		if slot.is_valid_target():
+			if type_numbers.has(slot.piece.type):
+				type_numbers[slot.piece.type] += 1
+			else:
+				type_numbers[slot.piece.type] = 1
+	var max_type: Piece.Type
+	var max_number := 0
+	for type: Piece.Type in type_numbers:
+		if type_numbers[type] > max_number:
+			max_number = type_numbers[type]
+			max_type = type
+	return max_type

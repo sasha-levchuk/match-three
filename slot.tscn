@@ -4,11 +4,11 @@
 [ext_resource type="Script" uid="uid://dr24dl6j5oqdx" path="res://slot.gd" id="2_hiqfk"]
 
 [node name="Slot" type="Sprite2D"]
-self_modulate = Color(0.105882354, 0.105882354, 0.105882354, 0.21176471)
+self_modulate = Color(0.23921569, 0.23921569, 0.23921569, 0.1882353)
 rotation = -3.1415927
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("1_khion")
-hframes = 5
+hframes = 6
 vframes = 3
 script = ExtResource("2_hiqfk")
 

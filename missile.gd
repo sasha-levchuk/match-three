@@ -1,13 +1,16 @@
 class_name Missile extends Sprite2D
-var velocity: Vector2
-const ACCEL := 3333
+const ACCEL := 2222
 const MAX_SPEED := 1111
 var target: Slot
-@onready var target_pos := position + (Vector2.ONE*100).rotated(randf()*TAU)
 var is_taking_off := true
 signal target_requested
 var rotation_speed: float
-@onready var rotation_direction := signf(randf()-.5)
+var velocity: Vector2
+@onready var rotation_direction := signf(randf()-.5) 
+#@onready var target_pos := position + (Vector2.ONE*100).rotated(randf()*TAU)
+@onready var target_pos := position + \
+	(get_viewport().get_camera_2d().position-position) \
+	.normalized().rotated((randf()-.5)*PI)*200
 
 
 func _process(delta: float):

@@ -8,9 +8,10 @@ enum Type{
 	SKULL,
 	ICE,
 	FIRE,
-	#MAGIC,
+	MAGIC,
+	WIND,
 	}
-@onready var type: Type = Type.values().pick_random() as Type
+@onready var type: Type = Type.values()[randi()%Global.difficulty] as Type
 enum PowerupType{
 	DISCOBALL, 
 	TNT, 
@@ -35,7 +36,8 @@ func _ready():
 	name = Type.keys()[type].left(1) + str(counter).pad_zeros(2)
 	%NameLabel.text = str(name)
 	%Sprite2.frame = 1 + type as int
-	%BtnPowerup.pressed.connect(make_powerup.bind(PowerupType.POOFY))
+	%BtnPoofy.pressed.connect(make_powerup.bind(PowerupType.POOFY))
+	%BtnDisco.pressed.connect(make_powerup.bind(PowerupType.DISCOBALL))
 	%BtnDelete.pressed.connect(delete)
 	area_entered.connect(func(piece: Piece):
 		if state==State.FALLING and piece.position.y < position.y:
@@ -76,7 +78,7 @@ func make_powerup(_powerup_type: PowerupType):
 	is_powerup = true
 	powerup_type = _powerup_type
 	%Sprite2.queue_free()
-	%Sprite.frame = 5 + powerup_type as int
+	%Sprite.frame = 6 + powerup_type as int
 	await get_tree().process_frame
 	state = State.IDLE
 
@@ -94,10 +96,21 @@ func move(where:=position) -> Signal:
 	return tween.finished
 
 
+func glow_delete():
+	state = State.BUSY
+	var tween := create_tween()
+	for i in 5:
+		tween.tween_property(%Glow, 'color', Color.ORANGE, TWEEN_TIME)
+		tween.tween_property(%Glow, 'color', Color.BLACK, TWEEN_TIME)
+	tween.tween_property(%Glow, 'color', Color.ORANGE, TWEEN_TIME)
+	tween.tween_callback(delete)
+	return tween
+
+
 func delete():
 	state = State.BUSY
-	var tween := create_tween().set_parallel()
-	tween.tween_property(self, 'modulate:a', 0.0, TWEEN_TIME)
+	var tween := create_tween()
+	tween.tween_property(%Glow, 'color', Color.ORANGE, TWEEN_TIME)
 	tween.tween_property(self, 'modulate:a', 0.0, TWEEN_TIME)
 	await tween.finished
 	queue_free()
@@ -120,7 +133,7 @@ func _physics_process(delta:float):
 
 func delete_type(_type: Type):
 	if type == _type and state == State.IDLE:
-		delete()
+		glow_delete()
 
 
 func explode():
@@ -129,6 +142,6 @@ func explode():
 		triggered.emit(powerup_type)
 	else:
 		%Sprite2.queue_free()
-	%Sprite.frame = 10
+	%Sprite.frame = 12 # explosion
 	await get_tree().create_timer(0.2).timeout
 	delete()
