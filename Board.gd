@@ -3,7 +3,6 @@ var slots: Dictionary[Vector2i, Slot]
 var sides: Array[Vector2i] = [Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT]
 @onready var tilesize := tile_set.tile_size as Vector2
 var prev_pieces:Array[Piece]
-@export var crystal: Node2D
 
 
 func _ready():
@@ -17,9 +16,10 @@ func _ready():
 		slot.piece_landed.connect(_on_piece_landed.bind(coord))
 		slot.piece_moved.connect(_on_piece_moved.bind(coord))
 		slot.piece_triggered.connect(_on_piece_triggered.bind(coord))
-		prints('refilling slot', coord)
-	for slot: Slot in get_children():
-		slot.piece_requested.emit()
+		slot.acquire_fall(Global.premade_pieces[slot.position])
+	prints('premade pieces', %PremadePieces.get_child_count())
+	#for slot: Slot in get_children():
+		#slot.piece_requested.emit()
 
 
 func _on_piece_requested(coord: Vector2i):
@@ -30,12 +30,10 @@ func _on_piece_requested(coord: Vector2i):
 		if not piece: continue
 		if piece.state==Piece.State.IDLE or piece.state==Piece.State.FALLING:
 			piece.departed.emit()
-			slots[coord].connect_signals(piece)
-			piece.state = Piece.State.FALLING
-			piece.set_physics_process(true)
+			slots[coord].acquire_fall(piece)
 			return
 		return
-	slots[coord].connect_signals(spawn_piece(coord.x))
+	slots[coord].acquire_fall(spawn_piece(coord.x))
 
 
 func _on_piece_landed(piece: Piece, coord: Vector2i):
@@ -130,6 +128,7 @@ func is_valid(coord: Vector2i):
 
 func spawn_piece(col: int) -> Piece:
 	var new_piece = load("res://piece.tscn").instantiate() as Piece
+	new_piece.add_to_group('matchables')
 	var pos := Vector2.RIGHT*col*tilesize + tilesize/2 + tilesize*Vector2.UP
 	var piece := prev_pieces[col]
 	if piece and is_instance_valid(piece) and piece.position.y-pos.y<tilesize.y:
@@ -188,7 +187,7 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 			delete_square(coord, 3, 22)
 			delete_square(coord, 22, 3)
 		[Piece.PowerupType.TNT, Piece.PowerupType.POOFY]:
-			prints('fan tnt')
+			pass
 		[Piece.PowerupType.ROCKETV, Piece.PowerupType.ROCKETV],\
 		[Piece.PowerupType.ROCKETH, Piece.PowerupType.ROCKETH],\
 		[Piece.PowerupType.ROCKETV, Piece.PowerupType.ROCKETH]:
@@ -218,12 +217,11 @@ func make_poofy_missile(coord: Vector2i):
 	missile.position = slots[coord].position
 	add_child(missile)
 	missile.target_requested.connect(func():
-		for i in 30:
-			var slot := slots.values().pick_random() as Slot
-			if slot.is_valid_target():
-				missile.target = slot
-				missile.target_pos = slot.position
-				break
+		var valid_slots: Array = slots.values().filter(func(s): return s.is_valid_target())
+		if not valid_slots: return
+		var slot: Slot = valid_slots.pick_random()
+		slot.piece.add_to_group('missile_targets')
+		missile.target = slot.piece
 		)
 
 

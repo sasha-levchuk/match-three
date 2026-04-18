@@ -2,8 +2,8 @@ class_name Piece extends Area2D
 static var counter: int
 const GRAVITY := 5555
 const TWEEN_TIME := .1 # seconds
-var is_matchable := true
-var is_powerup := false
+@export var is_matchable := true
+@export var is_powerup := false
 enum Type{
 	SKULL,
 	ICE,
@@ -11,7 +11,7 @@ enum Type{
 	MAGIC,
 	WIND,
 	}
-@onready var type: Type = Type.values()[randi()%Global.difficulty] as Type
+@export var type: Type
 enum PowerupType{
 	DISCOBALL, 
 	TNT, 
@@ -19,8 +19,8 @@ enum PowerupType{
 	ROCKETH, 
 	POOFY,
 	}
-var powerup_type: PowerupType
-enum State{FALLING, IDLE, DRAGGED, BUSY}
+@export var powerup_type: PowerupType
+enum State{IDLE, DRAGGED, BUSY, FALLING}
 var state: State
 #modulate = {State.IDLE: Color.WHITE,State.DRAGGED: Color.FUCHSIA,State.BUSY: Color.ORANGE,State.FALLING: Color.CADET_BLUE}[state]
 var landed: Signal
@@ -31,9 +31,12 @@ func _to_string(): return str(name)
 
 
 func _ready():
-	add_to_group('matchables')
+	Global.premade_pieces[position] = self
+	set_physics_process(false)
+	type = Type.values()[randi()%Global.difficulty] as Type
 	counter += 1
 	name = Type.keys()[type].left(1) + str(counter).pad_zeros(2)
+	prints('piece', name, 'ready')
 	%NameLabel.text = str(name)
 	%Sprite2.frame = 1 + type as int
 	%BtnPoofy.pressed.connect(make_powerup.bind(PowerupType.POOFY))
@@ -138,10 +141,17 @@ func delete_type(_type: Type):
 
 func explode():
 	state = State.BUSY
+	%Sprite.frame = 12 # explosion
 	if is_powerup:
+		await get_tree().create_timer(0.1).timeout
 		triggered.emit(powerup_type)
 	else:
 		%Sprite2.queue_free()
-	%Sprite.frame = 12 # explosion
 	await get_tree().create_timer(0.2).timeout
 	delete()
+
+
+func fall(_target: Vector2):
+	target = _target
+	state = State.FALLING
+	set_physics_process(true)

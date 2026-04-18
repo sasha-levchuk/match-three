@@ -28,6 +28,10 @@ gdscript/warnings/integer_division=0
 window/size/viewport_width=972
 window/size/viewport_height=972
 
+[physics]
+
+common/physics_ticks_per_second=30
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
