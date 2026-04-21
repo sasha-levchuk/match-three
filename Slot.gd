@@ -26,12 +26,12 @@ func acquire_move(_piece: Piece):
 
 func acquire_fall(_piece: Piece):
 	piece = _piece
+	piece.landed = piece_landed
 	piece.fall(position)
 	connect_signals()
 
 
 func connect_signals():
-	piece.landed = piece_landed
 	piece.triggered = piece_triggered
 	piece.moved = piece_moved
 	piece.departed = piece_departed
@@ -45,5 +45,4 @@ func _on_piece_departed():
 
 
 func is_valid_target():
-	return piece and piece.state == Piece.State.IDLE and piece.is_matchable \
-		and not piece.is_in_group('missile_targets')
+	return piece and piece.state == Piece.State.IDLE and piece.is_matchable

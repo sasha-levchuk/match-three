@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://dwmu7558f3mlm"]
+
+[ext_resource type="PackedScene" uid="uid://dhe3yegvn753r" path="res://piece.tscn" id="1_57s6h"]
+
+[node name="Piece" instance=ExtResource("1_57s6h")]
+is_matchable = false
+is_objective = true
+powerup_type = 4
+
+[node name="Sprite" parent="." index="1"]
+frame = 14
+
+[node name="Sprite2" parent="Sprite" index="2"]
+visible = false

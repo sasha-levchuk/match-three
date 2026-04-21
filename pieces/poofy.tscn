@@ -7,6 +7,9 @@ is_matchable = false
 is_powerup = true
 powerup_type = 4
 
+[node name="CollisionShape2D" parent="." index="0"]
+debug_color = Color(0.1015625, 0.1015625, 0.1015625, 0.41960785)
+
 [node name="Sprite" parent="." index="1"]
 frame = 10
 

@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bvlax6h61c8p0" path="res://sprites.png" id="2_sk825"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8l818"]
-size = Vector2(96, 102)
+size = Vector2(100, 100)
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_hisf2"]
 blend_mode = 1

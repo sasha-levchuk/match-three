@@ -4,6 +4,7 @@ const GRAVITY := 5555
 const TWEEN_TIME := .1 # seconds
 @export var is_matchable := true
 @export var is_powerup := false
+@export var is_objective := false
 enum Type{
 	SKULL,
 	ICE,
@@ -22,7 +23,9 @@ enum PowerupType{
 @export var powerup_type: PowerupType
 enum State{IDLE, DRAGGED, BUSY, FALLING}
 var state: State
-#modulate = {State.IDLE: Color.WHITE,State.DRAGGED: Color.FUCHSIA,State.BUSY: Color.ORANGE,State.FALLING: Color.CADET_BLUE}[state]
+	#set(v):
+		#state = v
+		#modulate = {State.IDLE: Color.WHITE,State.DRAGGED: Color.FUCHSIA,State.BUSY: Color.ORANGE,State.FALLING: Color.CADET_BLUE}[state]
 var landed: Signal
 var moved: Signal
 var departed: Signal
@@ -31,11 +34,16 @@ func _to_string(): return str(name)
 
 
 func _ready():
-	Global.premade_pieces[position] = self
 	set_physics_process(false)
 	type = Type.values()[randi()%Global.difficulty] as Type
 	counter += 1
-	name = Type.keys()[type].left(1) + str(counter).pad_zeros(2)
+	name = Type.keys()[type].left(1) 
+	if is_powerup:
+		name = PowerupType.keys()[powerup_type].left(1) 
+	if is_objective:
+		add_to_group(Group.OBJECTIVE)
+		name = 'O'
+	name += str(counter).pad_zeros(2)
 	prints('piece', name, 'ready')
 	%NameLabel.text = str(name)
 	%Sprite2.frame = 1 + type as int
@@ -120,20 +128,6 @@ func delete():
 	departed.emit()
 
 
-var target: Vector2
-var speed: float
-func _physics_process(delta:float):
-	speed += delta * GRAVITY
-	position = position.move_toward(target, delta * speed)
-	if position == target:
-		speed = 0
-		set_physics_process(false)
-		if is_matchable:
-			landed.emit(self)
-		elif is_powerup:
-			state = State.IDLE
-
-
 func delete_type(_type: Type):
 	if type == _type and state == State.IDLE:
 		glow_delete()
@@ -141,6 +135,8 @@ func delete_type(_type: Type):
 
 func explode():
 	state = State.BUSY
+	if is_objective:
+		Global.objectives -= 1
 	%Sprite.frame = 12 # explosion
 	if is_powerup:
 		await get_tree().create_timer(0.1).timeout
@@ -155,3 +151,16 @@ func fall(_target: Vector2):
 	target = _target
 	state = State.FALLING
 	set_physics_process(true)
+
+
+var target: Vector2
+var speed: float
+func _physics_process(delta:float):
+	speed += delta * GRAVITY
+	position = position.move_toward(target, delta * speed)
+	if position == target:
+		speed = 0
+		set_physics_process(false)
+		state = State.IDLE
+		if is_matchable:
+			landed.emit(self)

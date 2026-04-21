@@ -16,10 +16,14 @@ func _ready():
 		slot.piece_landed.connect(_on_piece_landed.bind(coord))
 		slot.piece_moved.connect(_on_piece_moved.bind(coord))
 		slot.piece_triggered.connect(_on_piece_triggered.bind(coord))
-		slot.acquire_fall(Global.premade_pieces[slot.position])
-	prints('premade pieces', %PremadePieces.get_child_count())
-	#for slot: Slot in get_children():
-		#slot.piece_requested.emit()
+	var premade_pieces: Dictionary[Vector2, Piece]
+	for piece: Piece in %PremadePieces.get_children():
+		premade_pieces[piece.position] = piece
+	for slot: Slot in get_children():
+		if premade_pieces.has(slot.position):
+			slot.acquire_fall(premade_pieces[slot.position])
+		else:
+			slot.piece_requested.emit()
 
 
 func _on_piece_requested(coord: Vector2i):
@@ -153,7 +157,7 @@ func _on_piece_triggered(powerup_type: Piece.PowerupType, coord: Vector2i):
 			delete_square(coord, 22, 1)
 		Piece.PowerupType.POOFY:
 			prints('single poofy')
-			make_poofy_missile(coord)
+			Missile.new(slots[coord].position)
 			delete_square(coord, 3, 1)
 			delete_square(coord, 1, 3)
 
@@ -179,7 +183,7 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 			for c: Vector2i in slots:
 				if not slots[c].is_valid_target(): continue
 				if not slots[c].piece.type == type: continue
-				slots[c].piece.glow_delete().tween_callback(make_poofy_missile.bind(c))
+				slots[c].piece.glow_delete().tween_callback(Missile.new.bind(c))
 		[Piece.PowerupType.TNT, Piece.PowerupType.TNT]:
 			delete_square(coord, 6, 6)
 		[Piece.PowerupType.TNT, Piece.PowerupType.ROCKETV],\
@@ -198,9 +202,9 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 			pass
 		[Piece.PowerupType.POOFY, Piece.PowerupType.POOFY]:
 			prints('double poofy')
-			make_poofy_missile(coord)
-			make_poofy_missile(coord)
-			make_poofy_missile(coord)
+			Missile.new(slots[coord].position)
+			Missile.new(slots[coord].position)
+			Missile.new(slots[coord].position)
 			delete_square(coord, 3, 1)
 			delete_square(coord, 1, 3)
 
@@ -210,19 +214,6 @@ func delete_square(coord: Vector2i, cols:=1, rows:=1):
 		for row: int in range(-rows/2, rows/2+1):
 			var del_coord := coord + Vector2i(col, row)
 			if is_valid(del_coord): slots[del_coord].piece.explode()
-
-
-func make_poofy_missile(coord: Vector2i):
-	var missile := load("res://missile.tscn").instantiate() as Missile
-	missile.position = slots[coord].position
-	add_child(missile)
-	missile.target_requested.connect(func():
-		var valid_slots: Array = slots.values().filter(func(s): return s.is_valid_target())
-		if not valid_slots: return
-		var slot: Slot = valid_slots.pick_random()
-		slot.piece.add_to_group('missile_targets')
-		missile.target = slot.piece
-		)
 
 
 func get_most_used_type() -> Piece.Type:
