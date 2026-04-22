@@ -6,24 +6,39 @@ var prev_pieces:Array[Piece]
 
 
 func _ready():
+	Event.reset_requested.connect(_on_reset_requested)
 	prev_pieces.resize(10)
 	await get_tree().process_frame
 	for slot: Slot in get_children():
 		var coord := Vector2i(slot.position/tilesize)
 		slots[coord] = slot
-		slot.get_node('CoordLabel').text = str(coord.x) + ' ' + str(coord.y)
+		#slot.get_node('CoordLabel').text = str(coord.x) + ' ' + str(coord.y)
 		slot.piece_requested.connect(_on_piece_requested.bind(coord))
 		slot.piece_landed.connect(_on_piece_landed.bind(coord))
 		slot.piece_moved.connect(_on_piece_moved.bind(coord))
 		slot.piece_triggered.connect(_on_piece_triggered.bind(coord))
+	gather_pieces()
+
+
+func gather_pieces():
 	var premade_pieces: Dictionary[Vector2, Piece]
 	for piece: Piece in %PremadePieces.get_children():
+		if piece.is_objective: Game.crystals += 1
 		premade_pieces[piece.position] = piece
-	for slot: Slot in get_children():
+	for slot: Slot in slots.values():
 		if premade_pieces.has(slot.position):
 			slot.acquire_fall(premade_pieces[slot.position])
 		else:
 			slot.piece_requested.emit()
+
+
+func _on_reset_requested():
+	Game.crystals = 0
+	for slot: Slot in slots.values():
+		if slot.piece: slot.piece.queue_free()
+	%PremadePieces.set_pattern(Vector2i.ZERO, tile_set.get_pattern(0))
+	await get_tree().process_frame
+	gather_pieces()
 
 
 func _on_piece_requested(coord: Vector2i):
@@ -32,7 +47,7 @@ func _on_piece_requested(coord: Vector2i):
 		row -= 1
 		var piece := slots[Vector2i(coord.x, row)].piece
 		if not piece: continue
-		if piece.state==Piece.State.IDLE or piece.state==Piece.State.FALLING:
+		if piece.is_idle or piece.state==Piece.State.FALLING:
 			piece.departed.emit()
 			slots[coord].acquire_fall(piece)
 			return
@@ -127,12 +142,12 @@ func _on_piece_moved(direction: Vector2i, coord: Vector2i):
 
 func is_valid(coord: Vector2i):
 	var slot := slots.get(coord) as Slot
-	return slot and slot.piece and slot.piece.state == Piece.State.IDLE
+	return slot and slot.piece and slot.piece.is_idle
 
 
 func spawn_piece(col: int) -> Piece:
 	var new_piece = load("res://piece.tscn").instantiate() as Piece
-	new_piece.add_to_group('matchables')
+	new_piece.add_to_group(Group.MATCHABLES)
 	var pos := Vector2.RIGHT*col*tilesize + tilesize/2 + tilesize*Vector2.UP
 	var piece := prev_pieces[col]
 	if piece and is_instance_valid(piece) and piece.position.y-pos.y<tilesize.y:
@@ -144,12 +159,13 @@ func spawn_piece(col: int) -> Piece:
 
 
 func _on_piece_triggered(powerup_type: Piece.PowerupType, coord: Vector2i):
-	#var offsets: Array[Vector2]
+	prints('on piece triggered', coord, powerup_type)
 	match powerup_type:
 		Piece.PowerupType.DISCOBALL:
 			var type := Piece.Type.values().pick_random() as Piece.Type
-			get_tree().call_group('matchables', 'delete_type', type)
+			get_tree().call_group(Group.MATCHABLES, 'delete_type', type)
 		Piece.PowerupType.TNT:
+			prints('tnt triggered at', coord)
 			delete_square(coord, 5, 5)
 		Piece.PowerupType.ROCKETV:
 			delete_square(coord, 1, 22)
@@ -171,19 +187,27 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 			var type2 := Piece.Type.values().pick_random() as Piece.Type
 			while type == type2:
 				type2 = Piece.Type.values().pick_random() as Piece.Type
-			get_tree().call_group('matchables', 'delete_type', type)
-			get_tree().call_group('matchables', 'delete_type', type2)
+			get_tree().call_group(Group.MATCHABLES, 'delete_type', type)
+			get_tree().call_group(Group.MATCHABLES, 'delete_type', type2)
 		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.TNT]:
-			pass
+			var type := get_most_used_type()
+			for piece: Piece in get_tree().get_nodes_in_group(Group.MATCHABLES):
+				if piece.type==type and piece.is_idle:
+					piece.make_powerup_and_explode(Piece.PowerupType.TNT)
+			#get_tree().call_group(Group.MATCHABLE, 'explode_type', type, Piece.PowerupType.TNT)
 		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.ROCKETV],\
 		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.ROCKETH]:
-			pass
+			var type := get_most_used_type()
+			for piece: Piece in get_tree().get_nodes_in_group(Group.MATCHABLES):
+				if piece.type==type and piece.is_idle:
+					var powerup := Piece.PowerupType.ROCKETV
+					if randi()%2: powerup = Piece.PowerupType.ROCKETH
+					piece.make_powerup_and_explode(powerup)
 		[Piece.PowerupType.DISCOBALL, Piece.PowerupType.POOFY]:
 			var type := get_most_used_type()
-			for c: Vector2i in slots:
-				if not slots[c].is_valid_target(): continue
-				if not slots[c].piece.type == type: continue
-				slots[c].piece.glow_delete().tween_callback(Missile.new.bind(c))
+			for piece: Piece in get_tree().get_nodes_in_group(Group.MATCHABLES):
+				if piece.type==type and piece.is_idle:
+					piece.delete(4).tween_callback(Missile.new.bind(piece.position))
 		[Piece.PowerupType.TNT, Piece.PowerupType.TNT]:
 			delete_square(coord, 6, 6)
 		[Piece.PowerupType.TNT, Piece.PowerupType.ROCKETV],\
@@ -213,17 +237,18 @@ func delete_square(coord: Vector2i, cols:=1, rows:=1):
 	for col: int in range(-cols/2, cols/2+1):
 		for row: int in range(-rows/2, rows/2+1):
 			var del_coord := coord + Vector2i(col, row)
-			if is_valid(del_coord): slots[del_coord].piece.explode()
+			if is_valid(del_coord): 
+				slots[del_coord].piece.explode()
 
 
 func get_most_used_type() -> Piece.Type:
 	var type_numbers: Dictionary[Piece.Type, int]
-	for slot: Slot in slots.values():
-		if slot.is_valid_target():
-			if type_numbers.has(slot.piece.type):
-				type_numbers[slot.piece.type] += 1
+	for piece: Piece in get_tree().get_nodes_in_group(Group.MATCHABLES):
+		if piece.is_idle:
+			if type_numbers.has(piece.type):
+				type_numbers[piece.type] += 1
 			else:
-				type_numbers[slot.piece.type] = 1
+				type_numbers[piece.type] = 1
 	var max_type: Piece.Type
 	var max_number := 0
 	for type: Piece.Type in type_numbers:

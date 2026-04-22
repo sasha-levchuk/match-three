@@ -1,3 +1,4 @@
 class_name Group
-const MATCHABLE = &"matchable"
-const OBJECTIVE = &"objective"
+const MATCHABLES = &"matchables"
+const OBJECTIVES = &"objectives"
+#const PIECES = &"pieces"

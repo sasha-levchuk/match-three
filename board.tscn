@@ -1,28 +1,31 @@
-[gd_scene load_steps=16 format=4 uid="uid://dt8p2iojq4fnx"]
+[gd_scene load_steps=21 format=4 uid="uid://dt8p2iojq4fnx"]
 
 [ext_resource type="Script" uid="uid://b4poowkh6b4lp" path="res://board.gd" id="1_8l818"]
 [ext_resource type="PackedScene" uid="uid://rhrwt1ymhft5" path="res://pieces/poofy.tscn" id="2_8l818"]
 [ext_resource type="PackedScene" uid="uid://bt67rrxixie1t" path="res://slot.tscn" id="2_psm7c"]
 [ext_resource type="PackedScene" uid="uid://dwmu7558f3mlm" path="res://pieces/crystal.tscn" id="3_jqgjh"]
+[ext_resource type="PackedScene" uid="uid://cikilco4m2dqa" path="res://pieces/rocketv.tscn" id="4_c4ttu"]
+[ext_resource type="PackedScene" uid="uid://c3w7q5h6q6eqi" path="res://pieces/tnt.tscn" id="4_rq8yp"]
+[ext_resource type="PackedScene" uid="uid://bc2rrfs264rl8" path="res://pieces/disco.tscn" id="5_tngv2"]
 [ext_resource type="Texture2D" uid="uid://bvlax6h61c8p0" path="res://sprites.png" id="5_vf5bc"]
+[ext_resource type="PackedScene" uid="uid://dujubmp3gn6n3" path="res://pieces/rocketh.tscn" id="5_xhrpu"]
 
-[sub_resource type="GDScript" id="GDScript_psm7c"]
-resource_name = "btn"
-script/source = "extends Button
-
-
-func _pressed():
-	prints('###########################')
-"
+[sub_resource type="TileMapPattern" id="TileMapPattern_c4ttu"]
+tile_data = PackedInt32Array(0, 0, 655360, 65536, 0, 655360, 131072, 0, 655360, 196608, 0, 655360, 262144, 0, 655360, 327680, 0, 655360, 393216, 0, 655360, 458752, 0, 655360, 524288, 0, 655360, 1, 0, 655360, 65537, 0, 655360, 131073, 0, 655360, 196609, 0, 655360, 262145, 0, 655360, 327681, 0, 655360, 393217, 0, 655360, 458753, 0, 655360, 524289, 0, 655360, 2, 0, 655360, 65538, 0, 655360, 131074, 0, 655360, 196610, 0, 655360, 262146, 0, 655360, 327682, 0, 655360, 393218, 0, 655360, 458754, 0, 655360, 524290, 0, 655360, 196611, 0, 65536, 262147, 0, 65536, 327683, 0, 196608, 393219, 0, 196608, 458755, 0, 655360, 524291, 0, 655360, 196612, 0, 65536, 262148, 0, 327680, 327684, 0, 327680, 393220, 0, 65536, 458756, 0, 655360, 524292, 0, 655360, 196613, 0, 262144, 262149, 0, 262144, 327685, 0, 131072, 393221, 0, 131072, 458757, 0, 655360, 524293, 0, 655360, 6, 0, 655360, 65542, 0, 655360, 131078, 0, 655360, 196614, 0, 655360, 262150, 0, 655360, 327686, 0, 655360, 393222, 0, 655360, 458758, 0, 655360, 524294, 0, 655360, 7, 0, 655360, 65543, 0, 655360, 131079, 0, 655360, 196615, 0, 655360, 262151, 0, 655360, 327687, 0, 655360, 393223, 0, 655360, 458759, 0, 655360, 524295, 0, 655360, 8, 0, 655360, 65544, 0, 655360, 131080, 0, 655360, 196616, 0, 655360, 262152, 0, 655360, 327688, 0, 655360, 393224, 0, 655360, 458760, 0, 655360, 524296, 0, 655360)
 
 [sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_psm7c"]
 scenes/0/scene = ExtResource("2_psm7c")
 scenes/1/scene = ExtResource("2_8l818")
-scenes/2/scene = ExtResource("3_jqgjh")
+scenes/2/scene = ExtResource("4_c4ttu")
+scenes/3/scene = ExtResource("5_xhrpu")
+scenes/4/scene = ExtResource("4_rq8yp")
+scenes/5/scene = ExtResource("5_tngv2")
+scenes/10/scene = ExtResource("3_jqgjh")
 
 [sub_resource type="TileSet" id="TileSet_mgc1s"]
 tile_size = Vector2i(108, 108)
 sources/0 = SubResource("TileSetScenesCollectionSource_psm7c")
+pattern_0 = SubResource("TileMapPattern_c4ttu")
 
 [sub_resource type="GDScript" id="GDScript_8l818"]
 resource_name = "camera"
@@ -66,7 +69,9 @@ script/source = "extends Label
 
 
 func _ready():
-	Global.objectives_updated.connect(func(v):text='x'+str(v))
+	Event.score_updated.connect(func():
+		text = 'x' + str(Game.crystals)
+	)
 "
 
 [sub_resource type="GDScript" id="GDScript_jqgjh"]
@@ -84,7 +89,15 @@ script/source = "extends HSlider
 
 
 func _ready():
-	value_changed.connect(func(new_val): Global.difficulty = int(new_val))
+	value_changed.connect(func(new_val): Game.difficulty = int(new_val))
+"
+
+[sub_resource type="GDScript" id="GDScript_xhrpu"]
+script/source = "extends Button
+
+
+func _pressed():
+	Event.reset_requested.emit()
 "
 
 [sub_resource type="GDScript" id="GDScript_c4ttu"]
@@ -92,32 +105,23 @@ script/source = "extends Panel
 
 
 func _ready():
-	Global.objectives_updated.connect(func(v):
-		if v==0: show()
+	Event.score_updated.connect(func():
+		if Game.crystals==0: 
+			show()
 	)
 "
 
 [node name="Root" type="Node2D"]
 
-[node name="Button" type="Button" parent="."]
-unique_name_in_owner = true
-visible = false
-offset_left = 1010.0
-offset_top = 28.0
-offset_right = 1068.0
-offset_bottom = 70.0
-text = "test"
-script = SubResource("GDScript_psm7c")
+[node name="Board" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAEAAAAAAAAAAAACAAAAAAAAAAAAAAACAAEAAAAAAAAAAAACAAIAAAAAAAAAAAABAAIAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAABAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAABAAQAAAAAAAAAAAABAAUAAAAAAAAAAAABAAYAAAAAAAAAAAABAAcAAAAAAAAAAAABAAgAAAAAAAAAAAACAAMAAAAAAAAAAAACAAQAAAAAAAAAAAACAAUAAAAAAAAAAAACAAYAAAAAAAAAAAACAAcAAAAAAAAAAAACAAgAAAAAAAAAAAADAAAAAAAAAAAAAAADAAEAAAAAAAAAAAADAAYAAAAAAAAAAAADAAcAAAAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAYAAAAAAAAAAAAEAAcAAAAAAAAAAAAEAAgAAAAAAAAAAAAFAAAAAAAAAAAAAAAFAAEAAAAAAAAAAAAFAAIAAAAAAAAAAAAFAAMAAAAAAAAAAAAFAAQAAAAAAAAAAAAFAAUAAAAAAAAAAAAFAAYAAAAAAAAAAAAFAAcAAAAAAAAAAAAFAAgAAAAAAAAAAAAGAAAAAAAAAAAAAAAGAAEAAAAAAAAAAAAGAAIAAAAAAAAAAAAGAAMAAAAAAAAAAAAGAAQAAAAAAAAAAAAGAAUAAAAAAAAAAAAGAAYAAAAAAAAAAAAGAAcAAAAAAAAAAAAGAAgAAAAAAAAAAAAHAAAAAAAAAAAAAAAHAAEAAAAAAAAAAAAHAAIAAAAAAAAAAAAHAAMAAAAAAAAAAAAHAAQAAAAAAAAAAAAHAAUAAAAAAAAAAAAHAAYAAAAAAAAAAAAHAAcAAAAAAAAAAAAHAAgAAAAAAAAAAAAIAAAAAAAAAAAAAAAIAAEAAAAAAAAAAAAIAAIAAAAAAAAAAAAIAAMAAAAAAAAAAAAIAAQAAAAAAAAAAAAIAAUAAAAAAAAAAAAIAAYAAAAAAAAAAAAIAAcAAAAAAAAAAAAIAAgAAAAAAAAAAAADAAgAAAAAAAAAAAADAAUAAAAAAAAAAAADAAQAAAAAAAAAAAADAAMAAAAAAAAAAAADAAIAAAAAAAAAAAAEAAIAAAAAAAAAAAAEAAQAAAAAAAAAAAAEAAMAAAAAAAAAAAAEAAUAAAAAAAAAAAA=")
+tile_set = SubResource("TileSet_mgc1s")
+script = ExtResource("1_8l818")
 
 [node name="PremadePieces" type="TileMapLayer" parent="."]
 unique_name_in_owner = true
-tile_map_data = PackedByteArray("AAAAAAEAAAAAAAAAAgAAAAAAAAAAAAAAAgABAAAAAAAAAAAAAgABAAEAAAAAAAAAAgAAAAIAAAAAAAAAAgAAAAMAAAAAAAAAAgAAAAQAAAAAAAAAAgAAAAUAAAAAAAAAAgAAAAYAAAAAAAAAAgAAAAcAAAAAAAAAAgAAAAgAAAAAAAAAAgABAAgAAAAAAAAAAgABAAcAAAAAAAAAAgABAAYAAAAAAAAAAgABAAUAAAAAAAAAAgABAAQAAAAAAAAAAgABAAMAAAAAAAAAAgABAAIAAAAAAAAAAgAIAAAAAAAAAAAAAgAIAAEAAAAAAAAAAgAIAAIAAAAAAAAAAgAIAAMAAAAAAAAAAgAIAAQAAAAAAAAAAgAIAAUAAAAAAAAAAgAIAAYAAAAAAAAAAgAIAAcAAAAAAAAAAgAIAAgAAAAAAAAAAgAHAAgAAAAAAAAAAgAHAAcAAAAAAAAAAgAHAAYAAAAAAAAAAgAHAAUAAAAAAAAAAgAHAAQAAAAAAAAAAgAHAAMAAAAAAAAAAgAHAAIAAAAAAAAAAgAHAAEAAAAAAAAAAgAHAAAAAAAAAAAAAgACAAAAAAAAAAAAAgACAAEAAAAAAAAAAgACAAIAAAAAAAAAAgACAAMAAAAAAAAAAgACAAQAAAAAAAAAAgACAAUAAAAAAAAAAgACAAYAAAAAAAAAAgACAAcAAAAAAAAAAgACAAgAAAAAAAAAAgADAAgAAAAAAAAAAQAEAAgAAAAAAAAAAQAFAAgAAAAAAAAAAQAGAAgAAAAAAAAAAgAGAAcAAAAAAAAAAgAGAAYAAAAAAAAAAgAGAAUAAAAAAAAAAgAGAAQAAAAAAAAAAgAGAAMAAAAAAAAAAgAGAAIAAAAAAAAAAgAGAAEAAAAAAAAAAgAGAAAAAAAAAAAAAgADAAQAAAAAAAAAAQADAAUAAAAAAAAAAQADAAYAAAAAAAAAAQADAAcAAAAAAAAAAQADAAAAAAAAAAAAAQADAAEAAAAAAAAAAQADAAIAAAAAAAAAAQADAAMAAAAAAAAAAQAFAAAAAAAAAAAAAQAFAAEAAAAAAAAAAQAFAAIAAAAAAAAAAQAFAAMAAAAAAAAAAQAFAAQAAAAAAAAAAQAFAAUAAAAAAAAAAQAFAAYAAAAAAAAAAQAFAAcAAAAAAAAAAQAEAAAAAAAAAAAAAQAEAAEAAAAAAAAAAQAEAAIAAAAAAAAAAQAEAAMAAAAAAAAAAQAEAAQAAAAAAAAAAQAEAAUAAAAAAAAAAQAEAAYAAAAAAAAAAQAEAAcAAAAAAAAAAQA=")
+tile_map_data = PackedByteArray("AAAAAAEAAAAAAAAACgAAAAAAAAAAAAAACgABAAAAAAAAAAAACgABAAEAAAAAAAAACgAAAAIAAAAAAAAACgAAAAMAAAAAAAAACgAAAAQAAAAAAAAACgAAAAUAAAAAAAAACgAAAAYAAAAAAAAACgAAAAcAAAAAAAAACgAAAAgAAAAAAAAACgABAAgAAAAAAAAACgABAAcAAAAAAAAACgABAAYAAAAAAAAACgABAAUAAAAAAAAACgABAAQAAAAAAAAACgABAAMAAAAAAAAACgABAAIAAAAAAAAACgAIAAAAAAAAAAAACgAIAAEAAAAAAAAACgAIAAIAAAAAAAAACgAIAAMAAAAAAAAACgAIAAQAAAAAAAAACgAIAAUAAAAAAAAACgAIAAYAAAAAAAAACgAIAAcAAAAAAAAACgAIAAgAAAAAAAAACgAHAAgAAAAAAAAACgAHAAcAAAAAAAAACgAHAAYAAAAAAAAACgAHAAUAAAAAAAAACgAHAAQAAAAAAAAACgAHAAMAAAAAAAAACgAHAAIAAAAAAAAACgAHAAEAAAAAAAAACgAHAAAAAAAAAAAACgACAAAAAAAAAAAACgACAAEAAAAAAAAACgACAAIAAAAAAAAACgACAAMAAAAAAAAACgACAAQAAAAAAAAACgACAAUAAAAAAAAACgACAAYAAAAAAAAACgACAAcAAAAAAAAACgACAAgAAAAAAAAACgAGAAgAAAAAAAAACgAGAAcAAAAAAAAACgAGAAYAAAAAAAAACgAGAAUAAAAAAAAACgAGAAQAAAAAAAAACgAGAAMAAAAAAAAACgAGAAIAAAAAAAAACgAGAAEAAAAAAAAACgAGAAAAAAAAAAAACgAEAAQAAAAAAAAABQAEAAUAAAAAAAAABQAFAAQAAAAAAAAABAAFAAMAAAAAAAAABAADAAUAAAAAAAAAAwADAAYAAAAAAAAAAwAFAAUAAAAAAAAAAgAFAAYAAAAAAAAAAgADAAQAAAAAAAAAAQADAAMAAAAAAAAAAQAEAAYAAAAAAAAAAQAFAAcAAAAAAAAACgAEAAcAAAAAAAAACgADAAcAAAAAAAAACgADAAgAAAAAAAAACgAEAAgAAAAAAAAACgAFAAgAAAAAAAAACgAEAAMAAAAAAAAAAQA=")
 tile_set = SubResource("TileSet_mgc1s")
-
-[node name="Board" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAEAAAAAAAAAAAACAAAAAAAAAAAAAAACAAEAAAAAAAAAAAACAAIAAAAAAAAAAAABAAIAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAABAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAABAAQAAAAAAAAAAAABAAUAAAAAAAAAAAABAAYAAAAAAAAAAAABAAcAAAAAAAAAAAABAAgAAAAAAAAAAAACAAMAAAAAAAAAAAACAAQAAAAAAAAAAAACAAUAAAAAAAAAAAACAAYAAAAAAAAAAAACAAcAAAAAAAAAAAACAAgAAAAAAAAAAAADAAAAAAAAAAAAAAADAAEAAAAAAAAAAAADAAIAAAAAAAAAAAADAAMAAAAAAAAAAAADAAQAAAAAAAAAAAADAAUAAAAAAAAAAAADAAYAAAAAAAAAAAADAAcAAAAAAAAAAAADAAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAIAAAAAAAAAAAAEAAMAAAAAAAAAAAAEAAQAAAAAAAAAAAAEAAUAAAAAAAAAAAAEAAYAAAAAAAAAAAAEAAcAAAAAAAAAAAAEAAgAAAAAAAAAAAAFAAAAAAAAAAAAAAAFAAEAAAAAAAAAAAAFAAIAAAAAAAAAAAAFAAMAAAAAAAAAAAAFAAQAAAAAAAAAAAAFAAUAAAAAAAAAAAAFAAYAAAAAAAAAAAAFAAcAAAAAAAAAAAAFAAgAAAAAAAAAAAAGAAAAAAAAAAAAAAAGAAEAAAAAAAAAAAAGAAIAAAAAAAAAAAAGAAMAAAAAAAAAAAAGAAQAAAAAAAAAAAAGAAUAAAAAAAAAAAAGAAYAAAAAAAAAAAAGAAcAAAAAAAAAAAAGAAgAAAAAAAAAAAAHAAAAAAAAAAAAAAAHAAEAAAAAAAAAAAAHAAIAAAAAAAAAAAAHAAMAAAAAAAAAAAAHAAQAAAAAAAAAAAAHAAUAAAAAAAAAAAAHAAYAAAAAAAAAAAAHAAcAAAAAAAAAAAAHAAgAAAAAAAAAAAAIAAAAAAAAAAAAAAAIAAEAAAAAAAAAAAAIAAIAAAAAAAAAAAAIAAMAAAAAAAAAAAAIAAQAAAAAAAAAAAAIAAUAAAAAAAAAAAAIAAYAAAAAAAAAAAAIAAcAAAAAAAAAAAAIAAgAAAAAAAAAAAA=")
-tile_set = SubResource("TileSet_mgc1s")
-script = ExtResource("1_8l818")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(486, 486)
@@ -127,35 +131,33 @@ script = SubResource("GDScript_8l818")
 unique_name_in_owner = true
 position = Vector2(1001, 29)
 
-[node name="MarginContainer3" type="MarginContainer" parent="."]
-offset_left = 117.0
-offset_top = -164.0
-offset_right = 853.0
-offset_bottom = -9.0
+[node name="UI" type="MarginContainer" parent="."]
+offset_top = -155.0
+offset_right = 972.0
 theme_override_constants/margin_left = 11
 theme_override_constants/margin_top = 11
 theme_override_constants/margin_right = 11
 theme_override_constants/margin_bottom = 11
 script = SubResource("GDScript_rq8yp")
 
-[node name="BoxContainer" type="BoxContainer" parent="MarginContainer3"]
+[node name="BoxContainer" type="BoxContainer" parent="UI"]
 layout_mode = 2
-size_flags_horizontal = 0
+size_flags_horizontal = 4
 size_flags_vertical = 8
 script = SubResource("GDScript_mgc1s")
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer3/BoxContainer"]
+[node name="Score" type="MarginContainer" parent="UI/BoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 11
 theme_override_constants/margin_top = 11
 theme_override_constants/margin_right = 11
 theme_override_constants/margin_bottom = 11
 
-[node name="PanelObjectives" type="Panel" parent="MarginContainer3/BoxContainer/MarginContainer"]
-custom_minimum_size = Vector2(333, 111)
+[node name="Panel" type="Panel" parent="UI/BoxContainer/Score"]
+custom_minimum_size = Vector2(288, 111)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer3/BoxContainer/MarginContainer/PanelObjectives"]
+[node name="Label" type="Label" parent="UI/BoxContainer/Score/Panel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -172,50 +174,60 @@ theme_override_font_sizes/font_size = 44
 text = "x54"
 script = SubResource("GDScript_tngv2")
 
-[node name="Sprites" type="Sprite2D" parent="MarginContainer3/BoxContainer/MarginContainer/PanelObjectives"]
-position = Vector2(117, 51)
+[node name="Sprites" type="Sprite2D" parent="UI/BoxContainer/Score/Panel"]
+position = Vector2(110, 48)
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("5_vf5bc")
 hframes = 6
 vframes = 3
 frame = 14
 
-[node name="MarginContainer2" type="MarginContainer" parent="MarginContainer3/BoxContainer"]
+[node name="Difficulty" type="MarginContainer" parent="UI/BoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 11
 theme_override_constants/margin_top = 11
 theme_override_constants/margin_right = 11
 theme_override_constants/margin_bottom = 11
 
-[node name="PanelDifficulty" type="Panel" parent="MarginContainer3/BoxContainer/MarginContainer2"]
-custom_minimum_size = Vector2(333, 111)
+[node name="Panel" type="Panel" parent="UI/BoxContainer/Difficulty"]
+custom_minimum_size = Vector2(288, 111)
 layout_mode = 2
 
-[node name="Number" type="Label" parent="MarginContainer3/BoxContainer/MarginContainer2/PanelDifficulty"]
+[node name="Number" type="Label" parent="UI/BoxContainer/Difficulty/Panel"]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -84.0
-offset_top = 9.0
-offset_right = -46.0
-offset_bottom = 100.0
-grow_horizontal = 0
-theme_override_font_sizes/font_size = 44
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 54.0
+offset_top = -34.5
+offset_right = 92.0
+offset_bottom = 56.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 33
 text = "5"
 horizontal_alignment = 2
 script = SubResource("GDScript_jqgjh")
 
-[node name="Difficulty" type="Label" parent="MarginContainer3/BoxContainer/MarginContainer2/PanelDifficulty"]
+[node name="Difficulty" type="Label" parent="UI/BoxContainer/Difficulty/Panel"]
 layout_mode = 1
-offset_left = 48.0
-offset_top = 9.0
-offset_right = 354.0
-offset_bottom = 100.0
-theme_override_font_sizes/font_size = 44
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -90.0
+offset_top = -34.5
+offset_right = 63.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 33
 text = "Difficulty:"
 
-[node name="SliderDifficulty" type="HSlider" parent="MarginContainer3/BoxContainer/MarginContainer2/PanelDifficulty"]
+[node name="SliderDifficulty" type="HSlider" parent="UI/BoxContainer/Difficulty/Panel"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 14
@@ -237,6 +249,27 @@ tick_count = 5
 ticks_on_borders = true
 ticks_position = 2
 script = SubResource("GDScript_vf5bc")
+
+[node name="Reset" type="MarginContainer" parent="UI/BoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 11
+theme_override_constants/margin_top = 11
+theme_override_constants/margin_right = 11
+theme_override_constants/margin_bottom = 11
+
+[node name="Panel" type="Panel" parent="UI/BoxContainer/Reset"]
+custom_minimum_size = Vector2(288, 111)
+layout_mode = 2
+
+[node name="Reset" type="Button" parent="UI/BoxContainer/Reset/Panel"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 154.0
+offset_bottom = 54.0
+theme_override_font_sizes/font_size = 21
+text = " Reset Level "
+script = SubResource("GDScript_xhrpu")
 
 [node name="PanelLevelCompleted" type="Panel" parent="."]
 visible = false
@@ -260,4 +293,4 @@ grow_vertical = 2
 theme_override_font_sizes/font_size = 88
 text = "Level Completed!"
 
-[connection signal="value_changed" from="MarginContainer3/BoxContainer/MarginContainer2/PanelDifficulty/SliderDifficulty" to="MarginContainer3/BoxContainer/MarginContainer2/PanelDifficulty/Number" method="update"]
+[connection signal="value_changed" from="UI/BoxContainer/Difficulty/Panel/SliderDifficulty" to="UI/BoxContainer/Difficulty/Panel/Number" method="update"]

@@ -8,13 +8,11 @@ signal piece_requested()
 
 
 func _ready():
-	piece_departed.connect(_on_piece_departed)
-	%ButtonTest.pressed.connect(func(): piece.make_powerup(Piece.PowerupType.TNT))
-	%ButtonClose.pressed.connect(func():
-		if piece: 
-			piece.delete()
-		else:
-			piece_departed.emit()
+	piece_departed.connect(func():
+		piece = null
+		while not piece:
+			piece_requested.emit()
+			await get_tree().create_timer(0.1).timeout
 		)
 
 
@@ -35,14 +33,3 @@ func connect_signals():
 	piece.triggered = piece_triggered
 	piece.moved = piece_moved
 	piece.departed = piece_departed
-
-
-func _on_piece_departed():
-	piece = null
-	while not piece:
-		piece_requested.emit()
-		await get_tree().create_timer(0.1).timeout
-
-
-func is_valid_target():
-	return piece and piece.state == Piece.State.IDLE and piece.is_matchable

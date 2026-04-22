@@ -1,6 +1,6 @@
 class_name Piece extends Area2D
 static var counter: int
-const GRAVITY := 5555
+const GRAVITY := 6666
 const TWEEN_TIME := .1 # seconds
 @export var is_matchable := true
 @export var is_powerup := false
@@ -23,6 +23,8 @@ enum PowerupType{
 @export var powerup_type: PowerupType
 enum State{IDLE, DRAGGED, BUSY, FALLING}
 var state: State
+var is_idle: bool:
+	get(): return state == State.IDLE
 	#set(v):
 		#state = v
 		#modulate = {State.IDLE: Color.WHITE,State.DRAGGED: Color.FUCHSIA,State.BUSY: Color.ORANGE,State.FALLING: Color.CADET_BLUE}[state]
@@ -35,16 +37,15 @@ func _to_string(): return str(name)
 
 func _ready():
 	set_physics_process(false)
-	type = Type.values()[randi()%Global.difficulty] as Type
+	type = Type.values()[randi()%Game.difficulty] as Type
 	counter += 1
 	name = Type.keys()[type].left(1) 
 	if is_powerup:
 		name = PowerupType.keys()[powerup_type].left(1) 
 	if is_objective:
-		add_to_group(Group.OBJECTIVE)
+		add_to_group(Group.OBJECTIVES)
 		name = 'O'
 	name += str(counter).pad_zeros(2)
-	prints('piece', name, 'ready')
 	%NameLabel.text = str(name)
 	%Sprite2.frame = 1 + type as int
 	%BtnPoofy.pressed.connect(make_powerup.bind(PowerupType.POOFY))
@@ -60,7 +61,7 @@ func _input_event(_viewport, event: InputEvent, _shape_idx):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			%Menu.show()
-		elif event.is_pressed() and state==State.IDLE:
+		elif event.is_pressed() and is_idle:
 			state = State.DRAGGED
 			z_index = 1
 			%Sprite.scale = Vector2.ONE * 0.53
@@ -84,7 +85,7 @@ func _mouse_exit():
 
 
 func make_powerup(_powerup_type: PowerupType):
-	remove_from_group('matchables')
+	remove_from_group(Group.MATCHABLES)
 	is_matchable = false
 	is_powerup = true
 	powerup_type = _powerup_type
@@ -92,6 +93,12 @@ func make_powerup(_powerup_type: PowerupType):
 	%Sprite.frame = 6 + powerup_type as int
 	await get_tree().process_frame
 	state = State.IDLE
+
+
+func make_powerup_and_explode(_powerup_type: PowerupType):
+	delete(5).tween_callback(triggered.emit.bind(_powerup_type))
+	%Sprite.frame = 6 + _powerup_type as int
+	%Sprite2.queue_free()
 
 
 func move(where:=position) -> Signal:
@@ -107,39 +114,35 @@ func move(where:=position) -> Signal:
 	return tween.finished
 
 
-func glow_delete():
+func delete(blink_times:=0) -> Tween:
 	state = State.BUSY
 	var tween := create_tween()
-	for i in 5:
+	for i in blink_times:
 		tween.tween_property(%Glow, 'color', Color.ORANGE, TWEEN_TIME)
+		tween.parallel().tween_property(self, 'scale', Vector2.ONE * 1.1, TWEEN_TIME)
 		tween.tween_property(%Glow, 'color', Color.BLACK, TWEEN_TIME)
+		tween.parallel().tween_property(self, 'scale', Vector2.ONE, TWEEN_TIME)
 	tween.tween_property(%Glow, 'color', Color.ORANGE, TWEEN_TIME)
-	tween.tween_callback(delete)
+	tween.parallel().tween_property(self, 'scale', Vector2.ONE * 1.1, TWEEN_TIME)
+	tween.tween_property(self, 'modulate:a', 0.0, TWEEN_TIME)
+	tween.tween_callback(queue_free)
+	tween.tween_callback(departed.emit)
 	return tween
 
 
-func delete():
-	state = State.BUSY
-	var tween := create_tween()
-	tween.tween_property(%Glow, 'color', Color.ORANGE, TWEEN_TIME)
-	tween.tween_property(self, 'modulate:a', 0.0, TWEEN_TIME)
-	await tween.finished
-	queue_free()
-	departed.emit()
-
-
 func delete_type(_type: Type):
-	if type == _type and state == State.IDLE:
-		glow_delete()
+	if type == _type and is_idle:
+		delete(5)
 
 
 func explode():
 	state = State.BUSY
 	if is_objective:
-		Global.objectives -= 1
+		Game.crystals -= 1
+		Event.score_updated.emit()
 	%Sprite.frame = 12 # explosion
 	if is_powerup:
-		await get_tree().create_timer(0.1).timeout
+		await get_tree().create_timer(0.05).timeout
 		triggered.emit(powerup_type)
 	else:
 		%Sprite2.queue_free()

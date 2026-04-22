@@ -12,11 +12,16 @@ var velocity: Vector2
 signal target_requested
 
 
-func _ready():
-	await get_tree().create_timer(0.5).timeout
-	while not target:
-		target_requested.emit()
+func _init(pos: Vector2):
+	add_child(load("res://missile.tscn").instantiate() as Sprite2D)
+	position = pos
+	Game.add_child(self)
+	target_requested.connect(find_new_target)
+	await get_tree().create_timer(randf()).timeout
+	while true:
 		await get_tree().create_timer(0.2).timeout
+		if target and target.is_idle and target.is_objective: continue
+		target_requested.emit()
 
 
 func _physics_process(delta):
@@ -27,7 +32,7 @@ func _physics_process(delta):
 	rotation_speed = min(rotation_speed + delta * 55, TAU*2)
 	rotation += rotation_speed * delta * rotation_direction
 	if not target: return
-	if target.state == Piece.State.IDLE:
+	if target.is_idle:
 		if target.position.distance_to(position) < 75:
 			print('BOOM')
 			targets.erase(target)
@@ -38,22 +43,15 @@ func _physics_process(delta):
 		target_requested.emit()
 
 
-func _init(pos: Vector2):
-	add_child(load("res://missile.tscn").instantiate() as Sprite2D)
-	position = pos
-	Global.add_child(self)
-	target_requested.connect(find_new_target)
-
-
 func find_new_target():
-	var objectives := get_tree().get_nodes_in_group(Group.OBJECTIVE).filter(
-		func(p): return not targets.has(p) and p.state==Piece.State.IDLE)
+	var objectives := get_tree().get_nodes_in_group(Group.OBJECTIVES).filter(
+		func(p: Piece): return not targets.has(p) and p.is_idle)
 	if objectives:
 		target = objectives.pick_random()
 		targets.append(target)
 		return
-	var matchables := get_tree().get_nodes_in_group(Group.MATCHABLE).filter(
-		func(p): return not targets.has(p) and p.state==Piece.State.IDLE)
+	var matchables := get_tree().get_nodes_in_group(Group.MATCHABLES).filter(
+		func(p): return not targets.has(p) and p.is_idle)
 	if matchables:
 		target = matchables.pick_random()
 		targets.append(target)
