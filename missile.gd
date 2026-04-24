@@ -5,23 +5,33 @@ const MAX_SPEED := 1555
 var target: Piece
 var rotation_speed: float
 var velocity: Vector2
+@export var fan_sprite: Sprite2D
+var has_cargo := false
+var cargo_type: Piece.PowerupType
+@export var cargo_sprite: Sprite2D
 @onready var rotation_direction := signf(randf()-.5) 
 @onready var init_target := position + \
 	(get_viewport().get_camera_2d().position-position) \
 	.normalized().rotated((randf()-.5)*PI)*200
-signal target_requested
 
 
-func _init(pos: Vector2):
-	add_child(load("res://missile.tscn").instantiate() as Sprite2D)
-	position = pos
-	Game.add_child(self)
-	target_requested.connect(find_new_target)
-	await get_tree().create_timer(randf()).timeout
+static func make(pos: Vector2, _has_cargo:=false, _cargo_type:=Piece.PowerupType.POOFY):
+	var missile := load("res://missile.tscn").instantiate() as Missile
+	missile.position = pos
+	if _has_cargo:
+		missile.has_cargo = _has_cargo
+		missile.cargo_type = _cargo_type
+		missile.cargo_sprite.show()
+		missile.cargo_sprite.frame = 6 + _cargo_type as int
+	Game.add_child(missile)
+
+
+func _ready():
+	await get_tree().create_timer( randf() ).timeout
 	while true:
 		await get_tree().create_timer(0.2).timeout
 		if target and target.is_idle and target.is_objective: continue
-		target_requested.emit()
+		find_new_target()
 
 
 func _physics_process(delta):
@@ -30,17 +40,20 @@ func _physics_process(delta):
 	velocity = velocity.move_toward(desired_vel, delta * ACCEL)
 	position += velocity * delta
 	rotation_speed = min(rotation_speed + delta * 55, TAU*2)
-	rotation += rotation_speed * delta * rotation_direction
+	fan_sprite.rotation += rotation_speed * delta * rotation_direction
 	if not target: return
 	if target.is_idle:
 		if target.position.distance_to(position) < 75:
 			print('BOOM')
 			targets.erase(target)
-			target.explode()
+			if has_cargo:
+				target.triggered.emit(cargo_type)
+			else:
+				target.explode()
 			queue_free()
 	else:
 		targets.erase(target)
-		target_requested.emit()
+		find_new_target()
 
 
 func find_new_target():

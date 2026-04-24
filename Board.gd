@@ -22,9 +22,10 @@ func _ready():
 
 func gather_pieces():
 	var premade_pieces: Dictionary[Vector2, Piece]
-	for piece: Piece in %PremadePieces.get_children():
+	for piece: Piece in %PiecesLayer.get_children():
 		if piece.is_objective: Game.crystals += 1
 		premade_pieces[piece.position] = piece
+	Event.score_updated.emit()
 	for slot: Slot in slots.values():
 		if premade_pieces.has(slot.position):
 			slot.acquire_fall(premade_pieces[slot.position])
@@ -36,7 +37,11 @@ func _on_reset_requested():
 	Game.crystals = 0
 	for slot: Slot in slots.values():
 		if slot.piece: slot.piece.queue_free()
-	%PremadePieces.set_pattern(Vector2i.ZERO, tile_set.get_pattern(0))
+	await get_tree().process_frame
+	var pattern := tile_set.get_pattern(0)
+	for coord: Vector2i in pattern.get_used_cells():
+		%PiecesLayer.erase_cell(coord)
+		%PiecesLayer.set_cell(coord, 0, Vector2i.ZERO, pattern.get_cell_alternative_tile(coord))
 	await get_tree().process_frame
 	gather_pieces()
 
@@ -173,7 +178,7 @@ func _on_piece_triggered(powerup_type: Piece.PowerupType, coord: Vector2i):
 			delete_square(coord, 22, 1)
 		Piece.PowerupType.POOFY:
 			prints('single poofy')
-			Missile.new(slots[coord].position)
+			Missile.make(slots[coord].position)
 			delete_square(coord, 3, 1)
 			delete_square(coord, 1, 3)
 
@@ -207,7 +212,7 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 			var type := get_most_used_type()
 			for piece: Piece in get_tree().get_nodes_in_group(Group.MATCHABLES):
 				if piece.type==type and piece.is_idle:
-					piece.delete(4).tween_callback(Missile.new.bind(piece.position))
+					piece.delete(4).tween_callback(Missile.make.bind(piece.position))
 		[Piece.PowerupType.TNT, Piece.PowerupType.TNT]:
 			delete_square(coord, 6, 6)
 		[Piece.PowerupType.TNT, Piece.PowerupType.ROCKETV],\
@@ -215,20 +220,21 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 			delete_square(coord, 3, 22)
 			delete_square(coord, 22, 3)
 		[Piece.PowerupType.TNT, Piece.PowerupType.POOFY]:
-			pass
+			Missile.make(slots[coord].position, true, Piece.PowerupType.TNT)
 		[Piece.PowerupType.ROCKETV, Piece.PowerupType.ROCKETV],\
 		[Piece.PowerupType.ROCKETH, Piece.PowerupType.ROCKETH],\
 		[Piece.PowerupType.ROCKETV, Piece.PowerupType.ROCKETH]:
 			delete_square(coord, 1, 22)
 			delete_square(coord, 22, 1)
-		[Piece.PowerupType.ROCKETV, Piece.PowerupType.POOFY],\
+		[Piece.PowerupType.ROCKETV, Piece.PowerupType.POOFY]:
+			Missile.make(slots[coord].position, true, Piece.PowerupType.ROCKETV)
 		[Piece.PowerupType.ROCKETH, Piece.PowerupType.POOFY]:
-			pass
+			Missile.make(slots[coord].position, true, Piece.PowerupType.ROCKETH)
 		[Piece.PowerupType.POOFY, Piece.PowerupType.POOFY]:
 			prints('double poofy')
-			Missile.new(slots[coord].position)
-			Missile.new(slots[coord].position)
-			Missile.new(slots[coord].position)
+			Missile.make(slots[coord].position)
+			Missile.make(slots[coord].position)
+			Missile.make(slots[coord].position)
 			delete_square(coord, 3, 1)
 			delete_square(coord, 1, 3)
 
