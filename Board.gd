@@ -1,22 +1,26 @@
 extends TileMapLayer
+
 var slots: Dictionary[Vector2i, Slot]
 var sides: Array[Vector2i] = [Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT]
 @onready var tilesize := tile_set.tile_size as Vector2
 var prev_pieces:Array[Piece]
+var size: Vector2i
 
 
 func _ready():
 	Event.reset_requested.connect(_on_reset_requested)
-	prev_pieces.resize(10)
 	await get_tree().process_frame
 	for slot: Slot in get_children():
 		var coord := Vector2i(slot.position/tilesize)
+		size = size.max(coord)
 		slots[coord] = slot
 		#slot.get_node('CoordLabel').text = str(coord.x) + ' ' + str(coord.y)
 		slot.piece_requested.connect(_on_piece_requested.bind(coord))
 		slot.piece_landed.connect(_on_piece_landed.bind(coord))
 		slot.piece_moved.connect(_on_piece_moved.bind(coord))
 		slot.piece_triggered.connect(_on_piece_triggered.bind(coord))
+	size += Vector2i.ONE
+	prev_pieces.resize(size.x)
 	gather_pieces()
 
 
@@ -227,7 +231,7 @@ func powerup_combine(types: Array[Piece.PowerupType], coord: Vector2i):
 			delete_square(coord, 1, 22)
 			delete_square(coord, 22, 1)
 		[Piece.PowerupType.ROCKETV, Piece.PowerupType.POOFY]:
-			Missile.make(slots[coord].position, true, Piece.PowerupType.ROCKETV)
+			Missile.make(slots[coord].position, true, Piece.PowerupType.ROCKETV, target_finder_column)
 		[Piece.PowerupType.ROCKETH, Piece.PowerupType.POOFY]:
 			Missile.make(slots[coord].position, true, Piece.PowerupType.ROCKETH)
 		[Piece.PowerupType.POOFY, Piece.PowerupType.POOFY]:
@@ -262,3 +266,20 @@ func get_most_used_type() -> Piece.Type:
 			max_number = type_numbers[type]
 			max_type = type
 	return max_type
+
+
+func target_finder_column() -> Piece:
+	var columns: Array[Array]
+	columns.resize(size.x)
+	for coord: Vector2i in slots:
+		var piece: Piece = slots[coord].piece
+		if piece and piece.is_objective and piece.is_idle:
+			columns[coord.x].append(piece)
+	var biggest_size := 0
+	for column_array: Array in columns:
+		biggest_size = maxi(biggest_size, column_array.size())
+	var optimal_targets: Array[Piece]
+	for column_array: Array[Piece] in columns:
+		if column_array.size() == biggest_size:
+			optimal_targets.append_array(column_array)
+	return optimal_targets.pick_random() as Piece

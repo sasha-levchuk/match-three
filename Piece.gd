@@ -59,9 +59,7 @@ func _ready():
 
 func _input_event(_viewport, event: InputEvent, _shape_idx):
 	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_RIGHT:
-			%Menu.show()
-		elif event.is_pressed() and is_idle:
+		if event.is_pressed() and is_idle:
 			state = State.DRAGGED
 			z_index = 1
 			%Sprite.scale = Vector2.ONE * 0.53
