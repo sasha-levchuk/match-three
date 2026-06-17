@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://d21adj22bbobr"]
+
+[ext_resource type="PackedScene" uid="uid://ciy28khjc2rb4" path="res://explosive.tscn" id="1_8pt2j"]
+[ext_resource type="Script" uid="uid://dq024ws58b0kk" path="res://explosive.gd" id="2_aixsj"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_5d32t"]
+blend_mode = 1
+
+[node name="TNT" unique_id=593744801 instance=ExtResource("1_8pt2j")]
+script = ExtResource("2_aixsj")
+type = 1
+
+[node name="DeletionFlash" parent="Sprite2D" parent_id_path=PackedInt32Array(471637509) index="0" unique_id=2059079650]
+material = SubResource("CanvasItemMaterial_5d32t")

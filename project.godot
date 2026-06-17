@@ -10,30 +10,27 @@ config_version=5
 
 [application]
 
-config/name="match-three"
-run/main_scene="uid://dt8p2iojq4fnx"
-config/features=PackedStringArray("4.5", "GL Compatibility")
+config/name="Match Three"
+run/main_scene="uid://uc4uuu2db7i7"
+config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-Game="*res://Game.gd"
-Event="*res://Event.gd"
-
-[debug]
-
-gdscript/warnings/integer_division=0
+Event="*uid://dvxwnswfw6e1l"
+Global="*uid://d17rbvqkmtii"
 
 [display]
 
-window/size/viewport_width=972
-window/size/viewport_height=972
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [physics]
 
-common/physics_ticks_per_second=30
+3d/physics_engine="Jolt Physics"
 
 [rendering]
 
+rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"

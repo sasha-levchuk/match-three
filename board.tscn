@@ -1,300 +1,61 @@
-[gd_scene load_steps=21 format=4 uid="uid://dt8p2iojq4fnx"]
+[gd_scene format=4 uid="uid://uc4uuu2db7i7"]
 
-[ext_resource type="Script" uid="uid://b4poowkh6b4lp" path="res://board.gd" id="1_8l818"]
-[ext_resource type="PackedScene" uid="uid://rhrwt1ymhft5" path="res://pieces/poofy.tscn" id="2_8l818"]
-[ext_resource type="PackedScene" uid="uid://bt67rrxixie1t" path="res://slot.tscn" id="2_psm7c"]
-[ext_resource type="PackedScene" uid="uid://dwmu7558f3mlm" path="res://pieces/crystal.tscn" id="3_jqgjh"]
-[ext_resource type="PackedScene" uid="uid://cikilco4m2dqa" path="res://pieces/rocketv.tscn" id="4_c4ttu"]
-[ext_resource type="PackedScene" uid="uid://c3w7q5h6q6eqi" path="res://pieces/tnt.tscn" id="4_rq8yp"]
-[ext_resource type="PackedScene" uid="uid://bc2rrfs264rl8" path="res://pieces/disco.tscn" id="5_tngv2"]
-[ext_resource type="Texture2D" uid="uid://bvlax6h61c8p0" path="res://sprites.png" id="5_vf5bc"]
-[ext_resource type="PackedScene" uid="uid://dujubmp3gn6n3" path="res://pieces/rocketh.tscn" id="5_xhrpu"]
+[ext_resource type="Script" uid="uid://bxetkv08u52ja" path="res://board.gd" id="1_p0ybc"]
+[ext_resource type="Texture2D" uid="uid://ch45ses3y5fin" path="res://icon.svg" id="2_8l818"]
+[ext_resource type="PackedScene" uid="uid://btr5c7c1eni1f" path="res://spawner.tscn" id="2_jqgjh"]
+[ext_resource type="PackedScene" uid="uid://clcc7bbw8dcjf" path="res://slot.tscn" id="2_psm7c"]
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_c4ttu"]
-tile_data = PackedInt32Array(0, 0, 655360, 65536, 0, 655360, 131072, 0, 655360, 196608, 0, 655360, 262144, 0, 655360, 327680, 0, 655360, 393216, 0, 655360, 458752, 0, 655360, 524288, 0, 655360, 1, 0, 655360, 65537, 0, 655360, 131073, 0, 655360, 196609, 0, 655360, 262145, 0, 655360, 327681, 0, 655360, 393217, 0, 655360, 458753, 0, 655360, 524289, 0, 655360, 2, 0, 655360, 65538, 0, 655360, 131074, 0, 655360, 196610, 0, 655360, 262146, 0, 655360, 327682, 0, 655360, 393218, 0, 655360, 458754, 0, 655360, 524290, 0, 655360, 196611, 0, 65536, 262147, 0, 65536, 327683, 0, 196608, 393219, 0, 196608, 458755, 0, 655360, 524291, 0, 655360, 196612, 0, 65536, 262148, 0, 327680, 327684, 0, 327680, 393220, 0, 65536, 458756, 0, 655360, 524292, 0, 655360, 196613, 0, 262144, 262149, 0, 262144, 327685, 0, 131072, 393221, 0, 131072, 458757, 0, 655360, 524293, 0, 655360, 6, 0, 655360, 65542, 0, 655360, 131078, 0, 655360, 196614, 0, 655360, 262150, 0, 655360, 327686, 0, 655360, 393222, 0, 655360, 458758, 0, 655360, 524294, 0, 655360, 7, 0, 655360, 65543, 0, 655360, 131079, 0, 655360, 196615, 0, 655360, 262151, 0, 655360, 327687, 0, 655360, 393223, 0, 655360, 458759, 0, 655360, 524295, 0, 655360, 8, 0, 655360, 65544, 0, 655360, 131080, 0, 655360, 196616, 0, 655360, 262152, 0, 655360, 327688, 0, 655360, 393224, 0, 655360, 458760, 0, 655360, 524296, 0, 655360)
+[sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_8l818"]
+scenes/1/scene = ExtResource("2_psm7c")
+scenes/2/scene = ExtResource("2_jqgjh")
 
-[sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_psm7c"]
-scenes/0/scene = ExtResource("2_psm7c")
-scenes/1/scene = ExtResource("2_8l818")
-scenes/2/scene = ExtResource("4_c4ttu")
-scenes/3/scene = ExtResource("5_xhrpu")
-scenes/4/scene = ExtResource("4_rq8yp")
-scenes/5/scene = ExtResource("5_tngv2")
-scenes/10/scene = ExtResource("3_jqgjh")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jqgjh"]
+resource_name = "Floor"
+texture = ExtResource("2_8l818")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/modulate = Color(0.32941177, 0.10980392, 0.050980393, 1)
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-64, -64, 64, -64, 64, 64, -64, 64)
 
-[sub_resource type="TileSet" id="TileSet_mgc1s"]
-tile_size = Vector2i(108, 108)
-sources/0 = SubResource("TileSetScenesCollectionSource_psm7c")
-pattern_0 = SubResource("TileMapPattern_c4ttu")
-
-[sub_resource type="GDScript" id="GDScript_8l818"]
-resource_name = "camera"
-script/source = "extends Camera2D
-@export var base_size := Vector2(972, 972)
-
-
-func _ready():
-	update_zoom()
-	get_viewport().size_changed.connect(update_zoom)
-
-
-func update_zoom():
-	var winsize := get_viewport_rect().size
-	var axis := winsize.min_axis_index()
-	zoom = winsize[axis] * Vector2.ONE / base_size
-	prints('update zoom', winsize, zoom)
-	var is_portrait := get_viewport_rect().size.max_axis_index() as bool
-	prints('is portrait', is_portrait)
-"
-
-[sub_resource type="GDScript" id="GDScript_rq8yp"]
-script/source = "extends MarginContainer
-
-
-func _ready():
-	if get_viewport_rect().size.min_axis_index() as bool:
-		position = %UIAnchorLandscape.position
-"
-
-[sub_resource type="GDScript" id="GDScript_mgc1s"]
-script/source = "extends BoxContainer
-
-
-func _ready():
-	vertical = get_viewport_rect().size.min_axis_index() as bool
-"
-
-[sub_resource type="GDScript" id="GDScript_tngv2"]
-script/source = "extends Label
-
-
-func _ready():
-	Event.score_updated.connect(func():
-		text = 'x' + str(Game.crystals)
-	)
-"
+[sub_resource type="TileSet" id="TileSet_4mug4"]
+tile_size = Vector2i(128, 128)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetScenesCollectionSource_8l818")
+sources/1 = SubResource("TileSetAtlasSource_jqgjh")
 
 [sub_resource type="GDScript" id="GDScript_jqgjh"]
-resource_name = "difficulty_number"
-script/source = "extends Label
-
-
-func update(new_val: float):
-	text = str( int( new_val ) )
-"
-
-[sub_resource type="GDScript" id="GDScript_vf5bc"]
-resource_name = "slider_difficulty"
-script/source = "extends HSlider
-
-
-func _ready():
-	value_changed.connect(func(new_val): Game.difficulty = int(new_val))
-"
-
-[sub_resource type="GDScript" id="GDScript_xhrpu"]
+resource_name = "testbtn"
 script/source = "extends Button
 
 
-func _pressed():
-	Event.reset_requested.emit()
+func _ready() -> void:
+	pressed.connect(Event.test.emit)
 "
 
-[sub_resource type="GDScript" id="GDScript_c4ttu"]
-script/source = "extends Panel
+[sub_resource type="GDScript" id="GDScript_vf5bc"]
+resource_name = "camera"
+script/source = "extends Camera2D
 
 
-func _ready():
-	Event.score_updated.connect(func():
-		if Game.crystals==0: 
-			show()
-	)
-	Event.reset_requested.connect(hide)
+func _ready() -> void:
+	Global.zoom = zoom
 "
 
-[node name="Root" type="Node2D"]
+[node name="Board" type="TileMapLayer" unique_id=349535064]
+tile_map_data = PackedByteArray("AAAAAAMAAAAAAAAAAQAAAAIAAAAAAAAAAQAAAAEAAAAAAAAAAQAAAAQAAAAAAAAAAQAAAAAAAAAAAAAAAgAAAAgAAQAAAAAAAAAAAAcAAAAAAAAAAQAAAAYAAAAAAAAAAQAAAAUAAAAAAAAAAQABAAcAAAAAAAAAAQABAAEAAAAAAAAAAQABAAIAAAAAAAAAAQABAAMAAAAAAAAAAQABAAQAAAAAAAAAAQABAAUAAAAAAAAAAQABAAYAAAAAAAAAAQACAAEAAAAAAAAAAQACAAIAAAAAAAAAAQACAAMAAAAAAAAAAQACAAQAAAAAAAAAAQACAAUAAAAAAAAAAQACAAYAAAAAAAAAAQACAAcAAAAAAAAAAQADAAEAAAAAAAAAAQADAAIAAAAAAAAAAQADAAMAAAAAAAAAAQADAAQAAAAAAAAAAQADAAUAAAAAAAAAAQADAAYAAAAAAAAAAQADAAcAAAAAAAAAAQAEAAEAAAAAAAAAAQAEAAIAAAAAAAAAAQAEAAMAAAAAAAAAAQAEAAQAAAAAAAAAAQAEAAUAAAAAAAAAAQAEAAYAAAAAAAAAAQAEAAcAAAAAAAAAAQAFAAEAAAAAAAAAAQAFAAIAAAAAAAAAAQAFAAMAAAAAAAAAAQAFAAQAAAAAAAAAAQAFAAUAAAAAAAAAAQAFAAYAAAAAAAAAAQAFAAcAAAAAAAAAAQAGAAEAAAAAAAAAAQAGAAIAAAAAAAAAAQAGAAMAAAAAAAAAAQAGAAQAAAAAAAAAAQAGAAUAAAAAAAAAAQAGAAYAAAAAAAAAAQAGAAcAAAAAAAAAAQABAAAAAAAAAAAAAgACAAAAAAAAAAAAAgADAAAAAAAAAAAAAgAEAAAAAAAAAAAAAgAFAAAAAAAAAAAAAgAGAAAAAAAAAAAAAgABAAgAAQAAAAAAAAACAAgAAQAAAAAAAAADAAgAAQAAAAAAAAAEAAgAAQAAAAAAAAAFAAgAAQAAAAAAAAAGAAgAAQAAAAAAAAA=")
+tile_set = SubResource("TileSet_4mug4")
+script = ExtResource("1_p0ybc")
 
-[node name="SlotsLayer" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAEAAAAAAAAAAAACAAAAAAAAAAAAAAACAAEAAAAAAAAAAAACAAIAAAAAAAAAAAABAAIAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAABAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAABAAQAAAAAAAAAAAABAAUAAAAAAAAAAAABAAYAAAAAAAAAAAABAAcAAAAAAAAAAAABAAgAAAAAAAAAAAACAAMAAAAAAAAAAAACAAQAAAAAAAAAAAACAAUAAAAAAAAAAAACAAYAAAAAAAAAAAACAAcAAAAAAAAAAAACAAgAAAAAAAAAAAADAAAAAAAAAAAAAAADAAEAAAAAAAAAAAADAAYAAAAAAAAAAAADAAcAAAAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAYAAAAAAAAAAAAEAAcAAAAAAAAAAAAEAAgAAAAAAAAAAAAFAAAAAAAAAAAAAAAFAAEAAAAAAAAAAAAFAAIAAAAAAAAAAAAFAAMAAAAAAAAAAAAFAAQAAAAAAAAAAAAFAAUAAAAAAAAAAAAFAAYAAAAAAAAAAAAFAAcAAAAAAAAAAAAFAAgAAAAAAAAAAAAGAAAAAAAAAAAAAAAGAAEAAAAAAAAAAAAGAAIAAAAAAAAAAAAGAAMAAAAAAAAAAAAGAAQAAAAAAAAAAAAGAAUAAAAAAAAAAAAGAAYAAAAAAAAAAAAGAAcAAAAAAAAAAAAGAAgAAAAAAAAAAAAHAAAAAAAAAAAAAAAHAAEAAAAAAAAAAAAHAAIAAAAAAAAAAAAHAAMAAAAAAAAAAAAHAAQAAAAAAAAAAAAHAAUAAAAAAAAAAAAHAAYAAAAAAAAAAAAHAAcAAAAAAAAAAAAHAAgAAAAAAAAAAAAIAAAAAAAAAAAAAAAIAAEAAAAAAAAAAAAIAAIAAAAAAAAAAAAIAAMAAAAAAAAAAAAIAAQAAAAAAAAAAAAIAAUAAAAAAAAAAAAIAAYAAAAAAAAAAAAIAAcAAAAAAAAAAAAIAAgAAAAAAAAAAAADAAgAAAAAAAAAAAADAAUAAAAAAAAAAAADAAQAAAAAAAAAAAADAAMAAAAAAAAAAAADAAIAAAAAAAAAAAAEAAIAAAAAAAAAAAAEAAQAAAAAAAAAAAAEAAMAAAAAAAAAAAAEAAUAAAAAAAAAAAA=")
-tile_set = SubResource("TileSet_mgc1s")
-script = ExtResource("1_8l818")
-
-[node name="PiecesLayer" type="TileMapLayer" parent="."]
-unique_name_in_owner = true
-tile_map_data = PackedByteArray("AAAAAAEAAAAAAAAACgAAAAAAAAAAAAAACgABAAAAAAAAAAAACgABAAEAAAAAAAAACgAAAAIAAAAAAAAACgAAAAMAAAAAAAAACgAAAAQAAAAAAAAACgAAAAUAAAAAAAAACgAAAAYAAAAAAAAACgAAAAcAAAAAAAAACgAAAAgAAAAAAAAACgABAAgAAAAAAAAACgABAAcAAAAAAAAACgABAAYAAAAAAAAACgABAAUAAAAAAAAACgABAAQAAAAAAAAACgABAAMAAAAAAAAACgABAAIAAAAAAAAACgAIAAAAAAAAAAAACgAIAAEAAAAAAAAACgAIAAIAAAAAAAAACgAIAAMAAAAAAAAACgAIAAQAAAAAAAAACgAIAAUAAAAAAAAACgAIAAYAAAAAAAAACgAIAAcAAAAAAAAACgAIAAgAAAAAAAAACgAHAAgAAAAAAAAACgAHAAcAAAAAAAAACgAHAAYAAAAAAAAACgAHAAUAAAAAAAAACgAHAAQAAAAAAAAACgAHAAMAAAAAAAAACgAHAAIAAAAAAAAACgAHAAEAAAAAAAAACgAHAAAAAAAAAAAACgACAAAAAAAAAAAACgACAAEAAAAAAAAACgACAAIAAAAAAAAACgACAAMAAAAAAAAACgACAAQAAAAAAAAACgACAAUAAAAAAAAACgACAAYAAAAAAAAACgACAAcAAAAAAAAACgACAAgAAAAAAAAACgAGAAgAAAAAAAAACgAGAAcAAAAAAAAACgAGAAYAAAAAAAAACgAGAAUAAAAAAAAACgAGAAQAAAAAAAAACgAGAAMAAAAAAAAACgAGAAIAAAAAAAAACgAGAAEAAAAAAAAACgAGAAAAAAAAAAAACgAEAAQAAAAAAAAABQAEAAUAAAAAAAAABQAFAAQAAAAAAAAABAAFAAMAAAAAAAAABAADAAUAAAAAAAAAAwADAAYAAAAAAAAAAwAFAAUAAAAAAAAAAgAFAAYAAAAAAAAAAgADAAQAAAAAAAAAAQADAAMAAAAAAAAAAQAEAAYAAAAAAAAAAQAFAAcAAAAAAAAACgAEAAcAAAAAAAAACgADAAcAAAAAAAAACgADAAgAAAAAAAAACgAEAAgAAAAAAAAACgAFAAgAAAAAAAAACgAEAAMAAAAAAAAAAQA=")
-tile_set = SubResource("TileSet_mgc1s")
-
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(486, 486)
-script = SubResource("GDScript_8l818")
-
-[node name="UIAnchorLandscape" type="Marker2D" parent="."]
-unique_name_in_owner = true
-position = Vector2(1001, 29)
-
-[node name="UI" type="MarginContainer" parent="."]
-offset_left = 5.0
-offset_top = -161.0
-offset_right = 965.0
-offset_bottom = -6.0
-size_flags_horizontal = 0
-size_flags_vertical = 0
-theme_override_constants/margin_left = 11
-theme_override_constants/margin_top = 11
-theme_override_constants/margin_right = 11
-theme_override_constants/margin_bottom = 11
-script = SubResource("GDScript_rq8yp")
-
-[node name="BoxContainer" type="BoxContainer" parent="UI"]
-layout_mode = 2
-size_flags_horizontal = 0
-script = SubResource("GDScript_mgc1s")
-
-[node name="Score" type="MarginContainer" parent="UI/BoxContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 11
-theme_override_constants/margin_top = 11
-theme_override_constants/margin_right = 11
-theme_override_constants/margin_bottom = 11
-
-[node name="Panel" type="Panel" parent="UI/BoxContainer/Score"]
-custom_minimum_size = Vector2(288, 111)
-layout_mode = 2
-
-[node name="Label" type="Label" parent="UI/BoxContainer/Score/Panel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -3.5
-offset_top = -36.0
-offset_right = 89.5
-offset_bottom = 40.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 44
-text = "x54"
-script = SubResource("GDScript_tngv2")
-
-[node name="Sprites" type="Sprite2D" parent="UI/BoxContainer/Score/Panel"]
-position = Vector2(110, 48)
-scale = Vector2(0.4, 0.4)
-texture = ExtResource("5_vf5bc")
-hframes = 6
-vframes = 3
-frame = 14
-
-[node name="Difficulty" type="MarginContainer" parent="UI/BoxContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 11
-theme_override_constants/margin_top = 11
-theme_override_constants/margin_right = 11
-theme_override_constants/margin_bottom = 11
-
-[node name="Panel" type="Panel" parent="UI/BoxContainer/Difficulty"]
-custom_minimum_size = Vector2(288, 111)
-layout_mode = 2
-
-[node name="Number" type="Label" parent="UI/BoxContainer/Difficulty/Panel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 54.0
-offset_top = -34.5
-offset_right = 92.0
-offset_bottom = 56.5
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 33
-text = "4"
-horizontal_alignment = 2
+[node name="Button" type="Button" parent="." unique_id=1341700591]
+offset_left = 1041.0
+offset_top = 121.00001
+offset_right = 1098.0
+offset_bottom = 152.0
+scale = Vector2(3.1732967, 3.1732967)
+text = "delete"
 script = SubResource("GDScript_jqgjh")
 
-[node name="Difficulty" type="Label" parent="UI/BoxContainer/Difficulty/Panel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -90.0
-offset_top = -34.5
-offset_right = 63.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 33
-text = "Difficulty:"
-
-[node name="SliderDifficulty" type="HSlider" parent="UI/BoxContainer/Difficulty/Panel"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 14
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = 31.0
-offset_top = 18.0
-offset_right = -31.0
-offset_bottom = 34.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_vertical = 8
-min_value = 1.0
-max_value = 5.0
-value = 4.0
-rounded = true
-tick_count = 5
-ticks_on_borders = true
-ticks_position = 2
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1182444038]
+position = Vector2(719, 579)
+zoom = Vector2(0.5, 0.5)
 script = SubResource("GDScript_vf5bc")
-
-[node name="Reset" type="MarginContainer" parent="UI/BoxContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 11
-theme_override_constants/margin_top = 11
-theme_override_constants/margin_right = 11
-theme_override_constants/margin_bottom = 11
-
-[node name="Panel" type="Panel" parent="UI/BoxContainer/Reset"]
-custom_minimum_size = Vector2(288, 111)
-layout_mode = 2
-
-[node name="Reset" type="Button" parent="UI/BoxContainer/Reset/Panel"]
-layout_mode = 0
-offset_left = 16.0
-offset_top = 12.0
-offset_right = 270.0
-offset_bottom = 93.0
-theme_override_font_sizes/font_size = 33
-text = " Reset Level "
-script = SubResource("GDScript_xhrpu")
-
-[node name="PanelLevelCompleted" type="Panel" parent="."]
-visible = false
-offset_right = 972.0
-offset_bottom = 972.0
-script = SubResource("GDScript_c4ttu")
-
-[node name="Label" type="Label" parent="PanelLevelCompleted"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -366.0
-offset_top = -174.0
-offset_right = 366.0
-offset_bottom = -53.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 88
-text = "Level Completed!"
-
-[connection signal="value_changed" from="UI/BoxContainer/Difficulty/Panel/SliderDifficulty" to="UI/BoxContainer/Difficulty/Panel/Number" method="update"]

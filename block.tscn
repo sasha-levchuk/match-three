@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://biyr3jvj3ngfc"]
+
+[ext_resource type="Texture2D" uid="uid://ch45ses3y5fin" path="res://icon.svg" id="1_xfwl5"]
+[ext_resource type="Script" uid="uid://hrgruhv02nho" path="res://block_sprite.gd" id="3_5d32t"]
+[ext_resource type="PackedScene" uid="uid://bwht3dcy0b64s" path="res://polygon128.tscn" id="4_mk58r"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mk58r"]
+size = Vector2(126, 126)
+
+[sub_resource type="LabelSettings" id="LabelSettings_xfwl5"]
+font_size = 32
+outline_size = 6
+outline_color = Color(0, 0, 0, 1)
+
+[node name="Block" type="CharacterBody2D" unique_id=593744801]
+z_as_relative = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1784382001]
+shape = SubResource("RectangleShape2D_mk58r")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=471637509 node_paths=PackedStringArray("deletion_flash")]
+clip_children = 2
+texture = ExtResource("1_xfwl5")
+script = ExtResource("3_5d32t")
+deletion_flash = NodePath("DeletionFlash")
+metadata/_custom_type_script = "uid://hrgruhv02nho"
+
+[node name="DeletionFlash" parent="Sprite2D" unique_id=2059079650 instance=ExtResource("4_mk58r")]
+
+[node name="Label" type="Label" parent="." unique_id=1126626480]
+unique_name_in_owner = true
+offset_left = -56.0
+offset_top = -58.0
+offset_right = 2.0
+offset_bottom = -13.0
+text = "B12"
+label_settings = SubResource("LabelSettings_xfwl5")

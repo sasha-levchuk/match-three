@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://ciy28khjc2rb4"]
+
+[ext_resource type="PackedScene" uid="uid://biyr3jvj3ngfc" path="res://block.tscn" id="1_n0ylg"]
+
+[node name="Explosive" unique_id=593744801 instance=ExtResource("1_n0ylg")]

@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bwht3dcy0b64s"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_5d32t"]
+blend_mode = 1
+
+[node name="DeletionFlash" type="Polygon2D" unique_id=2059079650]
+visible = false
+material = SubResource("CanvasItemMaterial_5d32t")
+color = Color(9.059, 0.438, 0, 1)
+polygon = PackedVector2Array(63, -63, 63, 63, -63, 63, -63, -63)

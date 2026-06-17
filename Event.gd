@@ -1,5 +1,7 @@
 extends Node
-@warning_ignore("unused_signal")
-signal score_updated
-@warning_ignore("unused_signal")
-signal reset_requested
+
+@warning_ignore_start("unused_signal")
+signal collision
+signal cascade
+signal move
+signal test
