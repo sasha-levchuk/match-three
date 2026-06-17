@@ -46,13 +46,16 @@ func delete():
 	Event.cascade.emit(coord)
 
 
-func spawn_rune(type: Explosive.Type):
+func spawn_explosive(type: Explosive.Type):
+	if is_idle:
+		push_error(name, 'is idle, make it busy upon spawning an explosive')
 	if type == Explosive.Type.NONE: 
 		delete()
 		return
 	block.queue_free()
-	block = Explosive.scenes[type].instantiate()
+	block = Explosive.scenes[type].instantiate() as Explosive
 	add_child(block)
+	block.sprite.play_spawn_animation()
 
 
 func take_block_move(new_block: Block, tween := create_tween()):
@@ -60,6 +63,7 @@ func take_block_move(new_block: Block, tween := create_tween()):
 	tween.tween_callback(func():
 		block = new_block
 	)
+
 
 
 

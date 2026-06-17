@@ -90,8 +90,8 @@ func finalize(move: Move):
 
 func revert(move: Move):
 	await animate(move)
-	move.slot1.block.is_idle = true
-	move.slot2.block.is_idle = true
+	move.slot1.is_idle = true
+	move.slot2.is_idle = true
 
 
 func cancel(move: Move):

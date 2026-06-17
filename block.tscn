@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://biyr3jvj3ngfc"]
 
 [ext_resource type="Texture2D" uid="uid://ch45ses3y5fin" path="res://icon.svg" id="1_xfwl5"]
-[ext_resource type="Script" uid="uid://hrgruhv02nho" path="res://block_sprite.gd" id="3_5d32t"]
+[ext_resource type="Script" uid="uid://ci58q27bgnbxy" path="res://block_sprite.gd" id="3_5d32t"]
 [ext_resource type="PackedScene" uid="uid://bwht3dcy0b64s" path="res://polygon128.tscn" id="4_mk58r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mk58r"]
@@ -23,7 +23,6 @@ clip_children = 2
 texture = ExtResource("1_xfwl5")
 script = ExtResource("3_5d32t")
 deletion_flash = NodePath("DeletionFlash")
-metadata/_custom_type_script = "uid://hrgruhv02nho"
 
 [node name="DeletionFlash" parent="Sprite2D" unique_id=2059079650 instance=ExtResource("4_mk58r")]
 
