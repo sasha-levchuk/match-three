@@ -24,6 +24,10 @@ func _ready() -> void:
 	spawned.emit()
 
 
+func get_hit():
+	explode()
+
+
 func explode():
 	anim_player.play('explode')
 	await anim_player.animation_finished

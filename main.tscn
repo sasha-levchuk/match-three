@@ -24,15 +24,15 @@ func _ready() -> void:
 func delete_random():
 	var holes: Array[Vector2i]
 	var batch := Batch.new()
+	var type := Matchable.Type.values().pick_random() as Matchable.Type
 	for coord: Vector2i in board.tiles:
-		if randi() % 3: continue
 		var tile: Tile = board.tiles.get(coord)
-		if tile and tile.is_idle:
+		if tile and tile.is_idle and tile is Matchable and tile.type==type:
 			holes.append(coord)
 			tile.delete()
 			batch.add_signal(tile.deleted)
 	await batch.finished
-	Event.batch_deleted.emit(holes)
+	board.cascade_many(holes)
 
 "
 
@@ -97,14 +97,29 @@ func setup(_tiles: Dictionary):
 	set_process(true)
 
 
-func _process(_delta: float) -> void:
+var timer: float
+func _process(delta: float) -> void:
+	timer += delta
+	if timer < .5: return
+	timer = 0.0
 	for coord: Vector2i in tiles:
 		if not tiles[coord]:
 			labels[coord].text = ''
 		else:
 			labels[coord].text = tiles[coord].label.text
+			if tiles[coord] is Matchable:
+				labels[coord].modulate = colors[tiles[coord].type]
+			else:
+				labels[coord].modulate = Color.WHITE
 
 
+var colors := [
+	Color(0.0, 1.0, 0.0, 1.0),
+	Color(0.384, 0.749, 1.0, 1.0),
+	Color(1.0, 0.451, 0.0, 1.0),
+	Color(1.0, 0.0, 1.0, 1.0),
+	Color(0.89, 0.922, 0.0, 1.0),
+	]
 "
 
 [sub_resource type="GDScript" id="GDScript_vt7at"]
@@ -125,13 +140,13 @@ tile_map_data = PackedByteArray("AAACAAIAAAAAAAAAAgADAAMAAAAAAAAAAgADAAQAAAAAAAA
 tile_set = SubResource("TileSet_h2yge")
 script = ExtResource("1_ig7tw")
 
-[node name="TestButton" type="Button" parent="." unique_id=2069389114 node_paths=PackedStringArray("board")]
+[node name="DelRndBtn" type="Button" parent="." unique_id=2069389114 node_paths=PackedStringArray("board")]
 offset_left = 1014.0
 offset_top = 76.0
 offset_right = 1052.0
 offset_bottom = 107.0
 scale = Vector2(2.2748857, 2.2748857)
-text = "test"
+text = "Delete random tiles"
 script = SubResource("GDScript_0xm2m")
 board = NodePath("../Board")
 

@@ -3,7 +3,7 @@ class_name Matchable extends Tile
 enum Type {
 	SKULL,
 	ICE,
-	FIRE,
+	#FIRE,
 	#MAGIC,
 	#PLUME,
 }

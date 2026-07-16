@@ -67,22 +67,21 @@ func move(tile: Tile, direction: Vector2i):
 	var batch := Batch.new()
 	var holes: Array[Vector2i]
 	for coord: Vector2i in [destination, origin]:
-		if tiles[coord] is Matchable:
-			tiles[coord].is_idle = true
-			var formation := Formation.new(coord)
-			if not formation.is_found: continue
+		tiles[coord].is_idle = true
+		if tiles[coord] is Explosive:
 			move_succeeded = true
-			if formation.has_reward:
-				tiles[coord].queue_free()
-				tiles[coord] = spawn_reward_at(coord, formation.reward)
-				batch.add_signal(tiles[coord].spawned)
-			for hole: Vector2i in formation.matches:
-				tiles[hole].get_matched()
-				batch.add_signal(tiles[hole].deleted)
-			holes.append_array(formation.matches)
-		elif tiles[coord] is Explosive:
-			move_succeeded = true
-			tiles[coord].is_idle = true
+			continue
+		var formation := Formation.new(coord)
+		if not formation.is_found: continue
+		move_succeeded = true
+		if formation.has_reward:
+			tiles[coord].queue_free()
+			tiles[coord] = spawn_reward_at(coord, formation.reward)
+			batch.add_signal(tiles[coord].spawned)
+		for hole: Vector2i in formation.matches:
+			tiles[hole].get_matched()
+			batch.add_signal(tiles[hole].deleted)
+		holes.append_array(formation.matches)
 	
 	if not move_succeeded:
 		await swap(origin, destination)
@@ -166,10 +165,6 @@ func _on_tile_landed(tile: Tile):
 	cascade_many(formation.matches)
 
 
-#func _on_tile_got_idle(tile: Tile):
-	#check_holes_and_cascade(local_to_map(tile.position))
-
-
 func check_and_fall(coord: Vector2i):
 	coord += Vector2i.DOWN
 	if tiles.has(coord) and tiles[coord]==null:
@@ -213,33 +208,36 @@ func on_click_released():
 	var batch := Batch.new()
 	var coords: Array[Vector2i]
 	coords.append(coord)
-	prepare_explosion(coord, explosive.exploded, coords, batch)
+	prepare_explosion(coord, coords, batch)
 	explosive.explode()
 	batch.add_signal(explosive.deleted)
 	await batch.finished
 	cascade_many(coords)
 
 
-func prepare_explosion(
-	origin: Vector2i,
-	exploded: Signal,
-	coords: Array[Vector2i],
-	batch: Batch
-):
-	for i: int in 4:
-		var coord := origin + Vector2i(Vector2.RIGHT.rotated(TAU*i/4))
-		var tile := tiles.get(coord) as Tile
-		if tile and tile.is_idle:
+func prepare_explosion(origin: Vector2i, coords: Array[Vector2i], batch: Batch):
+	var explosives_found: Array[Vector2i]
+	explosives_found.append(origin)
+	while explosives_found:
+		origin = explosives_found.pop_front()
+		var exploded := tiles[origin].exploded as Signal
+		for i: int in 4:
+			var coord := origin + Vector2i(Vector2.RIGHT.rotated(TAU*i/4))
+			var tile := tiles.get(coord) as Tile
+			if not tile or not tile.is_idle:
+				continue
+			
 			batch.add_signal(tile.deleted)
 			coords.append(coord)
 			tile.is_idle = false
-			if not tile is Explosive:
-				exploded.connect(tile.get_hit)
-				continue
-			
-			var explosive := tile as Explosive
-			prepare_explosion(coord, explosive.exploded, coords, batch)
-			exploded.connect(explosive.explode)
+			exploded.connect(tile.get_hit)
+			if tile is Explosive:
+				explosives_found.append(coord)
+
+
+#func get_explosive_shape(origin: Vector2i, type: Explosive.Type):
+	#for i in 4:
+
 
 
 

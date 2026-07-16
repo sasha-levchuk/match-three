@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="260707"
+config/name="Match-Three"
 run/main_scene="uid://dw6kvaf0ypcy3"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
