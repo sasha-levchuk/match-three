@@ -1,0 +1,161 @@
+[gd_scene format=4 uid="uid://dw6kvaf0ypcy3"]
+
+[ext_resource type="PackedScene" uid="uid://bwnijbbxr8kf3" path="res://matchable.tscn" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://d0yjr6mq881u5" path="res://board.gd" id="1_ig7tw"]
+
+[sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_0xm2m"]
+scenes/2/scene = ExtResource("1_0xm2m")
+
+[sub_resource type="TileSet" id="TileSet_h2yge"]
+tile_size = Vector2i(108, 108)
+sources/0 = SubResource("TileSetScenesCollectionSource_0xm2m")
+
+[sub_resource type="GDScript" id="GDScript_0xm2m"]
+resource_name = "TestButton"
+script/source = "extends Button
+
+@export var board: Board
+
+
+func _ready() -> void:
+	pressed.connect(delete_random)
+
+
+func delete_random():
+	var holes: Array[Vector2i]
+	var batch := Batch.new()
+	for coord: Vector2i in board.tiles:
+		if randi() % 3: continue
+		var tile: Tile = board.tiles.get(coord)
+		if tile and tile.is_idle:
+			holes.append(coord)
+			tile.delete()
+			batch.add_signal(tile.deleted)
+	await batch.finished
+	Event.batch_deleted.emit(holes)
+
+"
+
+[sub_resource type="GDScript" id="GDScript_wuxof"]
+resource_name = "floor"
+script/source = "extends StaticBody2D
+
+@export var board: Board
+
+
+func _ready() -> void:
+	position = board.map_to_local(board.get_used_rect().end) \\
+				- board.tile_set.tile_size / 2.0
+"
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_wuxof"]
+
+[sub_resource type="GDScript" id="GDScript_pxnx5"]
+resource_name = "camera"
+script/source = "extends Camera2D
+
+@export var board: Board
+
+
+func _ready() -> void:
+	await get_tree().process_frame
+	var view_height := get_viewport_rect().size.y
+	var rect := board.get_used_rect()
+	var target_height := rect.size.y * board.tile_set.tile_size.y
+	prints('zooming camera from', view_height, 'to', target_height)
+	zoom = Vector2.ONE * (view_height / target_height)
+	position = rect.size/2.0 * Vector2(board.tile_set.tile_size)
+	position.x += 222
+
+
+
+"
+
+[sub_resource type="TileSet" id="TileSet_0xm2m"]
+tile_size = Vector2i(44, 44)
+
+[sub_resource type="GDScript" id="GDScript_uoiob"]
+resource_name = "minimap"
+script/source = "extends TileMapLayer
+
+var tiles: Dictionary[Vector2i, Tile]
+var labels: Dictionary[Vector2i, Label]
+
+
+func _ready() -> void:
+	set_process(false)
+
+
+func setup(_tiles: Dictionary):
+	tiles = _tiles
+	for coord: Vector2i in tiles:
+		var label := Label.new()
+		label.position = map_to_local(coord)
+		label.text = 'init'
+		add_child(label)
+		labels[coord] = label
+	set_process(true)
+
+
+func _process(_delta: float) -> void:
+	for coord: Vector2i in tiles:
+		if not tiles[coord]:
+			labels[coord].text = ''
+		else:
+			labels[coord].text = tiles[coord].label.text
+
+
+"
+
+[sub_resource type="GDScript" id="GDScript_vt7at"]
+resource_name = "tile_counter"
+script/source = "extends Label
+
+@export var board: Board
+
+
+func _process(_delta: float) -> void:
+	text = 'Tile count: ' + str(board.get_child_count())
+"
+
+[node name="Main" type="Node2D" unique_id=217277789]
+
+[node name="Board" type="TileMapLayer" parent="." unique_id=603631397]
+tile_map_data = PackedByteArray("AAACAAIAAAAAAAAAAgADAAMAAAAAAAAAAgADAAQAAAAAAAAAAgAEAAQAAAAAAAAAAgAEAAMAAAAAAAAAAgAEAAEAAAAAAAAAAgAEAAIAAAAAAAAAAgADAAIAAAAAAAAAAgACAAMAAAAAAAAAAgACAAQAAAAAAAAAAgABAAQAAAAAAAAAAgABAAMAAAAAAAAAAgABAAIAAAAAAAAAAgABAAEAAAAAAAAAAgACAAEAAAAAAAAAAgADAAEAAAAAAAAAAgAAAAUAAAAAAAAAAgAAAAQAAAAAAAAAAgAAAAMAAAAAAAAAAgAAAAIAAAAAAAAAAgAAAAEAAAAAAAAAAgAAAAAAAAAAAAAAAgABAAAAAAAAAAAAAgACAAAAAAAAAAAAAgADAAAAAAAAAAAAAgAEAAAAAAAAAAAAAgAFAAAAAAAAAAAAAgAFAAEAAAAAAAAAAgAFAAIAAAAAAAAAAgAFAAMAAAAAAAAAAgAFAAQAAAAAAAAAAgAFAAUAAAAAAAAAAgAEAAUAAAAAAAAAAgADAAUAAAAAAAAAAgACAAUAAAAAAAAAAgABAAUAAAAAAAAAAgAAAAYAAAAAAAAAAgABAAYAAAAAAAAAAgACAAYAAAAAAAAAAgADAAYAAAAAAAAAAgAEAAYAAAAAAAAAAgAFAAYAAAAAAAAAAgAGAAYAAAAAAAAAAgAGAAUAAAAAAAAAAgAGAAQAAAAAAAAAAgAGAAMAAAAAAAAAAgAGAAIAAAAAAAAAAgAGAAEAAAAAAAAAAgAGAAAAAAAAAAAAAgAAAAcAAAAAAAAAAgABAAcAAAAAAAAAAgACAAcAAAAAAAAAAgADAAcAAAAAAAAAAgAEAAcAAAAAAAAAAgAFAAcAAAAAAAAAAgAGAAcAAAAAAAAAAgAHAAcAAAAAAAAAAgAHAAYAAAAAAAAAAgAHAAUAAAAAAAAAAgAHAAQAAAAAAAAAAgAHAAMAAAAAAAAAAgAHAAIAAAAAAAAAAgAHAAEAAAAAAAAAAgAHAAAAAAAAAAAAAgAAAAgAAAAAAAAAAgABAAgAAAAAAAAAAgACAAgAAAAAAAAAAgADAAgAAAAAAAAAAgAEAAgAAAAAAAAAAgAFAAgAAAAAAAAAAgAGAAgAAAAAAAAAAgAHAAgAAAAAAAAAAgAIAAgAAAAAAAAAAgAIAAcAAAAAAAAAAgAIAAYAAAAAAAAAAgAIAAUAAAAAAAAAAgAIAAQAAAAAAAAAAgAIAAMAAAAAAAAAAgAIAAIAAAAAAAAAAgAIAAEAAAAAAAAAAgAIAAAAAAAAAAAAAgA=")
+tile_set = SubResource("TileSet_h2yge")
+script = ExtResource("1_ig7tw")
+
+[node name="TestButton" type="Button" parent="." unique_id=2069389114 node_paths=PackedStringArray("board")]
+offset_left = 1014.0
+offset_top = 76.0
+offset_right = 1052.0
+offset_bottom = 107.0
+scale = Vector2(2.2748857, 2.2748857)
+text = "test"
+script = SubResource("GDScript_0xm2m")
+board = NodePath("../Board")
+
+[node name="Floor" type="StaticBody2D" parent="." unique_id=1146081924 node_paths=PackedStringArray("board")]
+script = SubResource("GDScript_wuxof")
+board = NodePath("../Board")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor" unique_id=1557816581]
+shape = SubResource("WorldBoundaryShape2D_wuxof")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=700028101 node_paths=PackedStringArray("board")]
+script = SubResource("GDScript_pxnx5")
+board = NodePath("../Board")
+
+[node name="Minimap" type="TileMapLayer" parent="." unique_id=1813434156]
+unique_name_in_owner = true
+position = Vector2(1012, 179)
+tile_set = SubResource("TileSet_0xm2m")
+script = SubResource("GDScript_uoiob")
+
+[node name="Label" type="Label" parent="." unique_id=199497030 node_paths=PackedStringArray("board")]
+offset_left = 1017.0
+offset_top = 25.0
+offset_right = 1057.0
+offset_bottom = 48.0
+script = SubResource("GDScript_vt7at")
+board = NodePath("../Board")

@@ -1,29 +1,27 @@
-@tool
-class_name Matchable extends Block
+class_name Matchable extends Tile
 
 enum Type {
 	SKULL,
 	ICE,
 	FIRE,
-	MAGIC,
-	PLUME,
+	#MAGIC,
+	#PLUME,
 }
 
 var type: Type
+@export var match_icon: Sprite2D
+@export var match_flash: Polygon2D
 @export var type_colors: Dictionary[Type, Color]
 
 
 func _ready() -> void:
+	super._ready()
 	type = Type.values().pick_random() as Type
-	name = Type.keys()[type].left(1) + str(count)
-	sprite.modulate = type_colors[type]
-	%Label.text = name
+	match_icon.frame = 1 + type
 
 
-func _to_string() -> String:
-	return str(name)
+func switch_type():
+	type = ( int(type) + 1 ) % Type.size() as Type
+	match_icon.frame = 1 + type
 
-
-func _on_id_set(v):
-	name = "SpawnPoint_%d" % v
 

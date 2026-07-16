@@ -1,5 +1,14 @@
-[gd_scene format=3 uid="uid://ciy28khjc2rb4"]
+[gd_scene format=3 uid="uid://b3uleju1jbt4m"]
 
-[ext_resource type="PackedScene" uid="uid://biyr3jvj3ngfc" path="res://block.tscn" id="1_n0ylg"]
+[ext_resource type="PackedScene" uid="uid://bjvivn3srlsga" path="res://tile.tscn" id="1_n0ylg"]
+[ext_resource type="Script" uid="uid://d0gikvngxv8kj" path="res://explosive.gd" id="2_oes7m"]
 
-[node name="Explosive" unique_id=593744801 instance=ExtResource("1_n0ylg")]
+[node name="Explosive" unique_id=165501869 instance=ExtResource("1_n0ylg")]
+script = ExtResource("2_oes7m")
+type = 0
+
+[node name="Sprite2D" parent="." index="1" unique_id=1560491218]
+frame = 10
+
+[node name="BusyFill" parent="Sprite2D" index="1" unique_id=1659051199]
+visible = false

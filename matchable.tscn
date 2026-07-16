@@ -1,14 +1,16 @@
-[gd_scene format=3 uid="uid://da36f4ftld5kc"]
+[gd_scene format=3 uid="uid://bwnijbbxr8kf3"]
 
-[ext_resource type="PackedScene" uid="uid://biyr3jvj3ngfc" path="res://block.tscn" id="1_vqvkl"]
-[ext_resource type="Script" uid="uid://bsw7hd71hiva2" path="res://matchable.gd" id="2_ka26l"]
+[ext_resource type="PackedScene" uid="uid://bjvivn3srlsga" path="res://tile.tscn" id="1_0fxdd"]
+[ext_resource type="Script" uid="uid://clx1ajnvwexru" path="res://matchable.gd" id="2_ka26l"]
+[ext_resource type="Texture2D" uid="uid://bxlqoysbrdnje" path="res://sprites.png" id="2_vqvkl"]
 
-[node name="Matchable" unique_id=593744801 instance=ExtResource("1_vqvkl")]
+[node name="Matchable" unique_id=165501869 node_paths=PackedStringArray("match_icon") instance=ExtResource("1_0fxdd")]
 script = ExtResource("2_ka26l")
-type_colors = Dictionary[int, Color]({
-0: Color(0, 0.6901961, 0, 1),
-1: Color(0, 1, 1, 1),
-2: Color(1, 0.5137255, 0, 1),
-3: Color(1, 0, 1, 1),
-4: Color(0, 0, 1, 1)
-})
+match_icon = NodePath("Sprite2D/MatchIcon")
+type_colors = Dictionary[int, Color]({})
+
+[node name="MatchIcon" type="Sprite2D" parent="Sprite2D" parent_id_path=PackedInt32Array(1560491218) index="0" unique_id=1135788378]
+texture = ExtResource("2_vqvkl")
+hframes = 6
+vframes = 3
+frame = 1

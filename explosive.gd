@@ -1,17 +1,35 @@
-class_name Explosive extends Block
+class_name Explosive extends Tile
 
 enum Type {
 	DISCO,
 	TNT,
-	ROCKETV,
 	ROCKETH,
+	ROCKETV,
 	WINGS,
-	NONE
-}
-
-static var scenes: Dictionary[Type, PackedScene] = {
-	Type.TNT: preload('res://tnt.tscn'),
-	#Type.WINGS: preload('res://wings.tscn'),
+	NONE,
 }
 
 @export var type: Type
+
+signal spawned
+signal exploded
+
+
+func _ready() -> void:
+	super._ready()
+	set_process(false)
+	anim_player.play('spawn')
+	await anim_player.animation_finished
+	is_idle = true
+	spawned.emit()
+
+
+func explode():
+	anim_player.play('explode')
+	await anim_player.animation_finished
+	exploded.emit()
+	delete()
+
+
+
+

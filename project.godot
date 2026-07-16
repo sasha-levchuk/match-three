@@ -10,15 +10,18 @@ config_version=5
 
 [application]
 
-config/name="Match Three"
-run/main_scene="uid://uc4uuu2db7i7"
+config/name="260707"
+run/main_scene="uid://dw6kvaf0ypcy3"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[audio]
+
+buses/default_bus_layout=""
+
 [autoload]
 
-Event="*uid://dvxwnswfw6e1l"
-Global="*uid://d17rbvqkmtii"
+Event="*uid://jx4vj4cmjywr"
 
 [display]
 
