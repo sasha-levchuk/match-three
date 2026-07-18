@@ -8,16 +8,21 @@ var drag_offset: Vector2
 
 func _ready() -> void:
 	Formation.tiles = tiles
+	ExplosionIter.tiles = tiles
 	prev_spawned_tiles.resize(get_used_rect().end.x)
-	Event.tile_landed.connect(_on_tile_landed)
 	await get_tree().process_frame
 	for tile: Tile in get_children():
 		var coord := local_to_map(tile.position)
+		tile.coord = coord
 		tiles[coord] = tile
-		if Formation.new(coord).matches:
-			tiles[coord].switch_type()
+		for i: int in Matchable.Type.size() - 1:
+			if Formation.new(coord).is_found:
+				tile.switch_type()
+			else:
+				break
 		tile.set_process(false)
 		tile.is_idle = true
+		tile.landed.connect(_on_tile_landed.bind(tile))
 	%Minimap.setup(tiles)
 
 
@@ -104,9 +109,11 @@ func swap(start: Vector2i, end: Vector2i) -> Signal:
 	var tile := tiles[start]
 	if tile.sprite.position:
 		tile.reset_sprite(tween)
-	tile.move(map_to_local(end), tween)
-	tiles[end].move(tile.position, tween)
+	tiles[end].move(map_to_local(start), tween)
+	tiles[end].coord = start
 	tiles[start] = tiles[end]
+	tile.move(map_to_local(end), tween)
+	tile.coord = end
 	tiles[end] = tile
 	return tween.finished
 
@@ -134,14 +141,26 @@ func spawn(coord: Vector2i) -> Tile:
 		tile.speed = prev_spawned_tiles[coord.x].speed
 	add_child(tile)
 	prev_spawned_tiles[coord.x] = tile
+	tile.landed.connect(_on_tile_landed.bind(tile))
 	return tile
+
+
+func spawn_reward_at(coord: Vector2i, type: Explosive.Type):
+	var explosive := preload("res://explosive.tscn").instantiate() as Explosive
+	explosive.position = map_to_local(coord)
+	explosive.coord = coord
+	explosive.type = type
+	explosive.sprite.frame = 6 + int(type)
+	add_child(explosive)
+	explosive.landed.connect(_on_tile_landed.bind(explosive))
+	return explosive
 
 
 func _on_tile_landed(tile: Tile):
 	var coord := local_to_map(tile.position)
 	if not tiles.has(coord) or tiles[coord] != tile: return
 	
-	tile.coord_label.text = str(coord)
+	tile.coord = coord
 	tile.speed = .0
 	tile.position = map_to_local(coord)
 	tile.set_process(false)
@@ -176,70 +195,46 @@ func cascade_many(holes: Array[Vector2i]):
 	holes.sort()
 	var prev_coord := holes[0]
 	for coord: Vector2i in holes:
-		tiles[coord].queue_free()
-		if coord - prev_coord != Vector2i(0, 1):
+		tiles[coord].queue_free_after_animation()
+		if coord - prev_coord != Vector2i.DOWN:
 			check_and_fall(prev_coord)
 		cascade(coord)
 		prev_coord = coord
 	check_and_fall(prev_coord)
 
 
-func spawn_reward_at(coord: Vector2i, type: Explosive.Type):
-	var explosive := preload("res://explosive.tscn").instantiate() as Explosive
-	explosive.position = map_to_local(coord)
-	explosive.type = type
-	explosive.sprite.frame = 6 + int(type)
-	add_child(explosive)
-	return explosive
-
-
 func on_click_released():
 	is_dragging = false
 	drag_offset = Vector2.ZERO
-	var coord := local_to_map(dragged_tile.position)
 	if dragged_tile is Matchable:
 		var tile := dragged_tile
 		await tile.reset_sprite()
 		tile.is_idle = true
-		check_and_fall(coord)
+		check_and_fall(tile.coord)
 		return
 	
-	var explosive := dragged_tile as Explosive
+	dragged_tile.explode()
 	var batch := Batch.new()
-	var coords: Array[Vector2i]
-	coords.append(coord)
-	prepare_explosion(coord, coords, batch)
-	explosive.explode()
-	batch.add_signal(explosive.deleted)
-	await batch.finished
-	cascade_many(coords)
-
-
-func prepare_explosion(origin: Vector2i, coords: Array[Vector2i], batch: Batch):
-	var explosives_found: Array[Vector2i]
-	explosives_found.append(origin)
-	while explosives_found:
-		origin = explosives_found.pop_front()
-		var exploded := tiles[origin].exploded as Signal
-		for i: int in 4:
-			var coord := origin + Vector2i(Vector2.RIGHT.rotated(TAU*i/4))
-			var tile := tiles.get(coord) as Tile
-			if not tile or not tile.is_idle:
-				continue
-			
+	batch.add_signal(dragged_tile.deleted)
+	var holes: Array[Vector2i]
+	holes.append(dragged_tile.coord)
+	var explosives_chained: Array[Explosive]
+	explosives_chained.append(dragged_tile)
+	while explosives_chained:
+		var explosive := explosives_chained.pop_front() as Explosive
+		prints('processing explosive', explosive)
+		for tile: Tile in ExplosionIter.new(explosive.coord, 4, 1):
 			batch.add_signal(tile.deleted)
-			coords.append(coord)
+			holes.append(tile.coord)
+			prints(tile, 'coord is', tile.coord, tiles.find_key(tile))
 			tile.is_idle = false
-			exploded.connect(tile.get_hit)
+			explosive.exploded.connect(tile.get_hit)
 			if tile is Explosive:
-				explosives_found.append(coord)
-
-
-#func get_explosive_shape(origin: Vector2i, type: Explosive.Type):
-	#for i in 4:
-
-
-
+				prints('explosive', tile, 'chained')
+				explosives_chained.append(tile)
+	
+	await batch.finished
+	cascade_many(holes)
 
 
 

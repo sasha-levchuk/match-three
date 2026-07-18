@@ -10,5 +10,5 @@ type = 0
 [node name="Sprite2D" parent="." index="1" unique_id=1560491218]
 frame = 10
 
-[node name="BusyFill" parent="Sprite2D" index="1" unique_id=1659051199]
+[node name="BusyFill" parent="." index="2" unique_id=1659051199]
 visible = false

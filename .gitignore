@@ -3,3 +3,4 @@
 .old/
 /android/
 *.tmp
+*.uid
